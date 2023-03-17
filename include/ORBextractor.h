@@ -4,6 +4,21 @@
 
 #ifndef MY_SLAM_ORBEXTRACTOR_H
 #define MY_SLAM_ORBEXTRACTOR_H
+#pragma one
+#include <opencv2/opencv.hpp>
+
+namespace my_slam {
+    class ORBextractor {
+    public:
+        ORBextractor();
+
+        ~ORBextractor();
+
+        void operator()(cv::InputArray image,
+                        std::vector<cv::KeyPoint> &keypoints,
+                        cv::Mat &descriptors);
+    };
+}
 
 
 #endif //MY_SLAM_ORBEXTRACTOR_H

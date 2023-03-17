@@ -6,7 +6,7 @@ file(GLOB_RECURSE SOURCES_ALL RELATIVE "${PROJECT_SOURCE_DIR}" "src/*.[ch]pp")
 string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWER)
 set(MySLAM_LIBNAME ${PROJECT_NAME_LOWER} CACHE INTERNAL "")
 
-add_library(${MySLAM_LIBNAME} ${INCLUDES_ALL} ${SOURCES_ALL} src/ORBextractor.cpp include/ORBextractor.h test/testORBextractor.cpp)
+add_library(${MySLAM_LIBNAME} ${INCLUDES_ALL} ${SOURCES_ALL} src/ORBextractor.cpp include/ORBextractor.h test/testORBextractor.cpp include/Frame.h src/Frame.cpp)
 source_group(TREE "${PROJECT_SOURCE_DIR}/include"
         PREFIX "Header Files"
         FILES ${INCLUDES_ALL}
@@ -35,10 +35,26 @@ include_directories(
 )
 
 target_link_libraries(${MySLAM_LIBNAME}
-        PUBLIC
-        Eigen3::Eigen
-        opencv_world
-        Ceres::ceres
-)
-
+        ${OpenCV_LIBS}
+        ${EIGEN3_LIBS}
+        ${CERES_LIBRARIES}
+        )
 add_subdirectory(test)
+
+string(TOUPPER ${PROJECT_NAME} PROJECT_NAME_UPPER)
+
+install(TARGETS
+        ${MySLAM_LIBNAME}
+        EXPORT ${PROJECT_NAME_LOWER}-config
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib
+        RUNTIME DESTINATION bin
+        INCLUDES DESTINATION include
+        )
+
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/include
+        DESTINATION ${CMAKE_INSTALL_PREFIX}
+        FILES_MATCHING PATTERN "*.h*"
+        )
+
+install(EXPORT ${PROJECT_NAME_LOWER}-config DESTINATION cmake)
