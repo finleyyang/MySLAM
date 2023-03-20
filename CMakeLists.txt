@@ -6,7 +6,7 @@ file(GLOB_RECURSE SOURCES_ALL RELATIVE "${PROJECT_SOURCE_DIR}" "src/*.[ch]pp")
 string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWER)
 set(MySLAM_LIBNAME ${PROJECT_NAME_LOWER} CACHE INTERNAL "")
 
-add_library(${MySLAM_LIBNAME} ${INCLUDES_ALL} ${SOURCES_ALL} src/ORBextractor.cpp include/ORBextractor.h test/testORBextractor.cpp include/Frame.h src/Frame.cpp)
+add_library(${MySLAM_LIBNAME} ${INCLUDES_ALL} ${SOURCES_ALL})
 source_group(TREE "${PROJECT_SOURCE_DIR}/include"
         PREFIX "Header Files"
         FILES ${INCLUDES_ALL}
