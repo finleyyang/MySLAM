@@ -9,35 +9,54 @@
 #include <Eigen/Eigen>
 
 #include "ORBextractor.h"
+#include "ORBmatch.h"
 
-namespace my_slam {
+namespace my_slam
+{
 
-    class Frame {
-    public:
-        Frame();
+	class MapPoint;
 
-        ~Frame();
+	class Frame
+	{
+	 public:
+		Frame();
 
-        Frame(cv::Mat image, cv::Mat imageright, cv::Mat K, cv::Mat D);
+		~Frame();
 
-        void ExtractORB();
+		Frame(cv::Mat image, cv::Mat imageright, cv::Mat K, cv::Mat D);
 
-    public:
-        cv::Mat image, imageRight;
+		void ExtractORB();
 
-        ORBextractor *ORBextractor, *ORBextractorright;
+		void ShowORB() const;
+	 public:
+		cv::Mat m_image, m_imageRight;
 
-        std::vector<cv::KeyPoint> keypoints;
-        std::vector<cv::KeyPoint> keypointsRight;
+		ORBExtractor* ORBextractor{}, * ORBextractorRight{};
 
-        cv::Mat descriptors, descriptorsRight;
+		ORBmatch*
 
-        cv::Mat K;
-        cv::Mat D;
+		std::vector<cv::KeyPoint> m_keypoints;
+		std::vector<cv::KeyPoint> m_keypointsRight;
 
-    private:
+		//对应右目的像素坐标
+		std::vector<float> m_uRight;
+		std::vector<float> m_vDepth;
 
-    };
+		cv::Mat m_descriptors, m_descriptorsRight;
+
+		std::vector<MapPoint*> m_mapPoints;
+
+	 protected:
+		cv::Mat m_K;
+		cv::Mat m_D;
+
+		//*cw,世界坐标转相机坐标
+		Eigen::Matrix4d m_Tcw;
+		Eigen::Matrix3d m_Rcw;
+		Eigen::Vector3d m_tcw;
+		Eigen::Matrix3d m_Rwc;
+		Eigen::Vector3d m_Ow;
+	};
 }
 
 #endif //MYSLAM_FRAME_H

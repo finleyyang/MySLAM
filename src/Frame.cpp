@@ -9,13 +9,23 @@ namespace my_slam {
 
     Frame::~Frame() = default;
 
-    Frame::Frame(cv::Mat image_, cv::Mat imageright_, cv::Mat K_, cv::Mat D_) : image(image_.clone()),
-                                                                                imageRight(imageright_.clone()),
-                                                                                K(K_.clone()), D(D_.clone()) {
+    Frame::Frame(cv::Mat image_, cv::Mat imageright_, cv::Mat K_, cv::Mat D_) : m_image(image_.clone()),
+                                                                                m_imageRight(imageright_.clone()),
+                                                                                m_K(K_.clone()), m_D(D_.clone()) {
     }
 
     void Frame::ExtractORB() {
-        (*ORBextractor)(image, keypoints, descriptors);
-        (*ORBextractorright)(imageRight, keypointsRight, descriptorsRight);
+        (*ORBextractor)(m_image, m_keypoints, m_descriptors);
+        (*ORBextractorRight)(m_imageRight, m_keypointsRight, m_descriptorsRight);
     }
+
+	void Frame::ShowORB() const
+	{
+		cv::Mat outimage;
+		cv::drawKeypoints(m_image, m_keypoints, outimage, cv::Scalar::all(-1), cv::DrawMatchesFlags::DEFAULT);
+		cv::Mat outimageRight;
+		cv::drawKeypoints(m_imageRight, m_keypointsRight, outimageRight, cv::Scalar::all(-1), cv::DrawMatchesFlags::DEFAULT);
+		cv::imshow("left", outimage);
+		cv::waitKey(0);
+	}
 }

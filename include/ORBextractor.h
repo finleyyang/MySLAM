@@ -7,17 +7,19 @@
 #pragma one
 #include <opencv2/opencv.hpp>
 
-namespace my_slam {
-    class ORBextractor {
-    public:
-        ORBextractor();
+namespace my_slam
+{
+	class ORBExtractor
+	{
+	 public:
+		ORBExtractor();
 
-        ~ORBextractor();
+		~ORBExtractor();
 
-        void operator()(cv::InputArray image,
-                        std::vector<cv::KeyPoint> &keypoints,
-                        cv::Mat &descriptors);
-    };
+		void operator()(cv::InputArray image,
+			std::vector<cv::KeyPoint>& keypoints,
+			cv::Mat& descriptors);
+	};
 }
 
 

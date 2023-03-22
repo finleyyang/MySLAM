@@ -26,18 +26,21 @@ set(CMAKE_CXX_STANDARD 17)
 find_package(Eigen3 REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(Ceres REQUIRED)
+find_package(Pangolin REQUIRED)
 
 
 include_directories(
         ${EIGEN3_INCLUDE_DIR}
         ${OpenCV_INCLUDE_DIRS}
         ${CERES_INCLUDE_DIRS}
+        ${Pangolin_INCLUDE_DIRS}
 )
 
 target_link_libraries(${MySLAM_LIBNAME}
         ${OpenCV_LIBS}
         ${EIGEN3_LIBS}
-        ${CERES_LIBRARIES}
+        ${CERES_LIBS}
+        ${Pangolin_LIBS}
         )
 add_subdirectory(test)
 
