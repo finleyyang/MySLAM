@@ -27,6 +27,7 @@ find_package(Eigen3 REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(Ceres REQUIRED)
 find_package(Pangolin REQUIRED)
+find_package(spdlog REQUIRED)
 
 
 include_directories(
@@ -34,6 +35,7 @@ include_directories(
         ${OpenCV_INCLUDE_DIRS}
         ${CERES_INCLUDE_DIRS}
         ${Pangolin_INCLUDE_DIRS}
+        ${spdlog_INCLUDE_DIRS}
 )
 
 target_link_libraries(${MySLAM_LIBNAME}
@@ -41,6 +43,7 @@ target_link_libraries(${MySLAM_LIBNAME}
         ${EIGEN3_LIBS}
         ${CERES_LIBS}
         ${Pangolin_LIBS}
+        ${spdlog_LIBS}
         )
 add_subdirectory(test)
 

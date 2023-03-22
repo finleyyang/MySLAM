@@ -23,8 +23,8 @@ namespace my_slam
 		static int calculateDescriptorDistance(const cv::Mat &a, const cv::Mat &b);
 
 	 public:
-		static const int TH_LOW = 0;
-		static const int TH_HIGH = 0;
+		static const int TH_LOW;
+		static const int TH_HIGH;
 		static const int HISTO_LENGTH;
 	};
 }

@@ -9,6 +9,10 @@
 
 namespace my_slam
 {
+	const int ORBMatcher::TH_HIGH = 100;
+	const int ORBMatcher::TH_LOW = 50;
+	const int ORBMatcher::HISTO_LENGTH = 30;
+
 	ORBMatcher::ORBMatcher() = default;
 
 	ORBMatcher::~ORBMatcher() = default;
