@@ -14,13 +14,18 @@ namespace my_slam
 {
 	class Frame;
 
-	class ORBMatch
+	class ORBMatcher
 	{
 	 public:
-		ORBMatch();
-		~ORBMatch();
+		ORBMatcher();
+		~ORBMatcher();
 
-		int calculateDescriptorDistance(const cv::Mat &a, const cv::Mat &b);
+		static int calculateDescriptorDistance(const cv::Mat &a, const cv::Mat &b);
+
+	 public:
+		static const int TH_LOW;
+		static const int TH_HIGH;
+		static const int HISTO_LENGTH;
 	};
 }
 

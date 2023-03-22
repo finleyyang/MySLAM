@@ -5,15 +5,15 @@
 *  BRIEF      :
 *  Email      : finleyyang@163.com
 ******************************************************************************/
-#include "ORBmatch.h"
+#include "ORBmatcher.h"
 
 namespace my_slam
 {
-	ORBMatch::ORBMatch() = default;
+	ORBMatcher::ORBMatcher() = default;
 
-	ORBMatch::~ORBMatch() = default;
+	ORBMatcher::~ORBMatcher() = default;
 
-	int ORBMatch::calculateDescriptorDistance(const cv::Mat& a, const cv::Mat& b)
+	int ORBMatcher::calculateDescriptorDistance(const cv::Mat& a, const cv::Mat& b)
 	{
 		const int *pa = a.ptr<int32_t>();
 		const int *pb = b.ptr<int32_t>();

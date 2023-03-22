@@ -9,7 +9,7 @@
 #include <Eigen/Eigen>
 
 #include "ORBextractor.h"
-#include "ORBmatch.h"
+#include "ORBmatcher.h"
 
 namespace my_slam
 {
@@ -23,28 +23,37 @@ namespace my_slam
 
 		~Frame();
 
-		Frame(cv::Mat image, cv::Mat imageright, cv::Mat K, cv::Mat D);
+		Frame(const cv::Mat& image, const cv::Mat& imageright, const cv::Mat& K, const cv::Mat& D);
 
 		void ExtractORB();
+
+		void StereoMatch();
 
 		void ShowORB() const;
 	 public:
 		cv::Mat m_image, m_imageRight;
 
-		ORBExtractor* ORBextractor{}, * ORBextractorRight{};
+		int m_rows{}, m_cols{};
 
-		ORBmatch*
+		int N{};
+
+		ORBExtractor* ORBextractor{}, * ORBextractorRight{};
 
 		std::vector<cv::KeyPoint> m_keypoints;
 		std::vector<cv::KeyPoint> m_keypointsRight;
 
 		//对应右目的像素坐标
 		std::vector<float> m_uRight;
-		std::vector<float> m_vDepth;
+		std::vector<float> m_Depth;
 
 		cv::Mat m_descriptors, m_descriptorsRight;
 
 		std::vector<MapPoint*> m_mapPoints;
+
+		float m_b{0.0};
+		//z = bf / d;
+		//m_bf = baseline * length_focal
+		float m_bf{0.0};
 
 	 protected:
 		cv::Mat m_K;

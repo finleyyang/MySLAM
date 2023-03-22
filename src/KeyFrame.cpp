@@ -7,12 +7,17 @@
 ******************************************************************************/
 
 #include "KeyFrame.h"
+
+#include <utility>
 namespace my_slam
 {
 	KeyFrame::~KeyFrame() = default;
 	KeyFrame::KeyFrame() = default;
 
-	KeyFrame::KeyFrame(cv::Mat image, cv::Mat imageright, cv::Mat K, cv::Mat D) : Frame(image, imageright, K, D)
+	KeyFrame::KeyFrame(cv::Mat image, cv::Mat imageright, cv::Mat K, cv::Mat D) : Frame(std::move(image),
+		std::move(imageright),
+		std::move(K),
+		std::move(D))
 	{
 
 	}
