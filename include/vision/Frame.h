@@ -7,6 +7,7 @@
 #pragma one
 #include <opencv2/opencv.hpp>
 #include <Eigen/Eigen>
+#include <spdlog/spdlog.h>
 
 #include "vision/ORBextractor.h"
 #include "vision/ORBmatcher.h"
@@ -29,7 +30,10 @@ namespace my_slam
 
 		void StereoMatch();
 
+		// using for test
 		void ShowORB() const;
+
+		void showstereomatch();
 	 public:
 		cv::Mat m_image, m_imageRight;
 
@@ -50,10 +54,10 @@ namespace my_slam
 
 		std::vector<MapPoint*> m_mapPoints;
 
-		float m_b{0.0};
+		float m_b{0.537};
 		//z = bf / d;
 		//m_bf = baseline * length_focal
-		float m_bf{0.0};
+		float m_bf{386.1448};
 
 	 protected:
 		cv::Mat m_K;

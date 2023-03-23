@@ -1,17 +1,15 @@
 /******************************************************************************
-*  FILE_NAME  : Initializer.cpp
+*  FILE_NAME  : Tracker.cpp
 *  AUTHER     : finley
-*  DATA       : 23-3-21
+*  DATA       : 23-3-23
 *  BRIEF      :
 *  Email      : finleyyang@163.com
 ******************************************************************************/
-#include "vision/Initializer.h"
+#include "vision/Tracker.h"
 
 namespace my_slam
 {
-	Initializer::Initializer() = default;
-	Initializer::~Initializer() = default;
 
-
+	Tracker::Tracker() = default;
+	Tracker::~Tracker() = default;
 }
-
