@@ -25,6 +25,8 @@ namespace my_slam
 		~Tracker();
 
 	 protected:
+		void LoadParam();
+
 		void Tracking();
 
 		void StereoInitial();

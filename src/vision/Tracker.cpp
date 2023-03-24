@@ -11,5 +11,16 @@ namespace my_slam
 {
 
 	Tracker::Tracker() = default;
+
 	Tracker::~Tracker() = default;
+
+	void Tracker::LoadParam()
+	{
+
+	}
+
+	void Tracker::Tracking()
+	{
+
+	}
 }

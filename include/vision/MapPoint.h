@@ -21,7 +21,7 @@ namespace my_slam
 	 protected:
 		Eigen::Vector3d m_worldPose;
 
-		std::map<KeyFrame*, size_t> m_observations;
+		std::map<KeyFrame*, size_t> m_observations;  //哪个关键帧，中的第几个特征点
 
 		KeyFrame* m_refKF;
 	};
