@@ -10,8 +10,9 @@
 #define MYSLAM_SRC_VISION_TRACKER_H_
 #pragma one
 
-#include "Frame.h"
-#include "KeyFrame.h"
+#include "vision/Frame.h"
+#include "vision/KeyFrame.h"
+#include "vision/MapPoint.h"
 
 namespace my_slam
 {
@@ -24,12 +25,26 @@ namespace my_slam
 		Tracker();
 		~Tracker();
 
+		Frame m_currentFrame;
+
+		enum e_TrackingState{
+			SYSTEM_NOT_READY=-1,
+			NO_IMAGES_YET=0,
+			NOT_INITIALIZED=1,
+			OK=2,
+			LOST=3
+		};
+
 	 protected:
 		void LoadParam();
 
 		void Tracking();
 
 		void StereoInitial();
+
+	 public:
+
+		Map* mp_map;
 	};
 }
 

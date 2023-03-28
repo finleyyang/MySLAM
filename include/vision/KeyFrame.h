@@ -10,8 +10,12 @@
 #define MYSLAM_SRC_KEYFRAME_H_
 #pragma one
 #include "vision/Frame.h"
+#include "vision/Map.h"
 namespace my_slam
 {
+	class Map;
+	class MapPoint;
+
 	class KeyFrame : public Frame
 	{
 	 public:
@@ -19,7 +23,24 @@ namespace my_slam
 
 		~KeyFrame();
 
-		KeyFrame(cv::Mat image, cv::Mat imageright, cv::Mat K, cv::Mat D);
+		KeyFrame(Frame& F, Map* p_map);
+
+		void AddMapPoint(MapPoint* pmp, const size_t &idx);
+
+		bool isBad();
+
+	 public:
+
+		Map* mp_map;
+
+		std::vector<MapPoint*> mvp_mapPoints;
+
+		bool mb_Bad;
+
+		long unsigned int m_KFId;
+		static long unsigned int m_LastId;
+		static long unsigned int m_FrameId;
+
 	};
 }
 

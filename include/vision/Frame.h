@@ -30,6 +30,12 @@ namespace my_slam
 
 		void StereoMatch();
 
+		Eigen::Vector3d UnprojectStereo(const int &i);
+
+		void SetPose(Eigen::Matrix4d Tcw);
+
+		void UpdatePose();
+
 		// using for test
 		void ShowORB() const;
 
@@ -43,16 +49,16 @@ namespace my_slam
 
 		ORBExtractor* ORBextractor{}, * ORBextractorRight{};
 
-		std::vector<cv::KeyPoint> m_keypoints;
-		std::vector<cv::KeyPoint> m_keypointsRight;
+		std::vector<cv::KeyPoint> mv_keypoints;
+		std::vector<cv::KeyPoint> mv_keypointsRight;
 
 		//对应右目的像素坐标
-		std::vector<float> m_uRight;
-		std::vector<float> m_Depth;
+		std::vector<float> mv_uRight;
+		std::vector<float> mv_Depth;
 
 		cv::Mat m_descriptors, m_descriptorsRight;
 
-		std::vector<MapPoint*> m_mapPoints;
+		std::vector<MapPoint*> mvp_mapPoints;
 
 		float m_b{0.537};
 		//z = bf / d;
@@ -62,6 +68,8 @@ namespace my_slam
 	 protected:
 		cv::Mat m_K;
 		cv::Mat m_D;
+
+		static float fx, fy, cx, cy, invfx, invfy;
 
 		//*cw,世界坐标转相机坐标
 		Eigen::Matrix4d m_Tcw;

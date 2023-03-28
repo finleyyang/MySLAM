@@ -11,14 +11,23 @@
 #include <utility>
 namespace my_slam
 {
-	KeyFrame::~KeyFrame() = default;
-	KeyFrame::KeyFrame() = default;
+	long unsigned int KeyFrame::m_LastId=0;
 
-	KeyFrame::KeyFrame(cv::Mat image, cv::Mat imageright, cv::Mat K, cv::Mat D) : Frame(std::move(image),
-		std::move(imageright),
-		std::move(K),
-		std::move(D))
+	KeyFrame::KeyFrame() = default;
+	KeyFrame::~KeyFrame() = default;
+
+	KeyFrame::KeyFrame(Frame& F, Map* p_map): mp_map(p_map)
 	{
 
+	}
+
+	void KeyFrame::AddMapPoint(MapPoint* pmp, const size_t& idx)
+	{
+		mvp_mapPoints[idx] = pmp;
+	}
+
+	bool KeyFrame::isBad()
+	{
+		return mb_Bad;
 	}
 }
