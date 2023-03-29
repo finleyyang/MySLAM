@@ -64,6 +64,16 @@ namespace my_slam
 			mp_lastKeyFrame = pKFini;
 
 			mvp_localKeyFrames.push_back(pKFini);
+			mvp_localMapPoints = mp_map->GetAllMapPoints();
+			mp_referenceKeyFrame = pKFini;
+			m_currentFrame.mp_referenceKeyFrame = pKFini;
+
+			mp_map->SetReferenceMapPoints(mvp_localMapPoints);
+			mp_map->mvp_keyFrameOrigins.push_back(pKFini);
+
+			mp_draw->SetCurrentCameraPose(m_currentFrame.m_Tcw);
+
+			m_State = OK;
 		}
 	}
 }

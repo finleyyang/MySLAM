@@ -11,11 +11,13 @@
 
 #include "vision/ORBextractor.h"
 #include "vision/ORBmatcher.h"
+#include "vision/KeyFrame.h"
 
 namespace my_slam
 {
 
 	class MapPoint;
+	class KeyFrame;
 
 	class Frame
 	{
@@ -77,6 +79,8 @@ namespace my_slam
 		Eigen::Matrix4d m_Tcw;
 
 		int mi_FId;
+
+		KeyFrame* mp_referenceKeyFrame;
 
 	 protected:
 		Eigen::Matrix3d m_Rcw;

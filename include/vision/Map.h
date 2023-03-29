@@ -40,9 +40,18 @@ namespace my_slam
 
 		std::vector<MapPoint*> GetReferenceMapPoints();
 
+		void SetReferenceMapPoints(std::vector<MapPoint*> vpmP);
+
+	 public:
+
+		std::vector<KeyFrame*> mvp_keyFrameOrigins;
+
 	 protected:
 		std::set<MapPoint*> msp_mapPoints;
 		std::set<KeyFrame*> msp_keyFrames;
+
+		std::vector<MapPoint*> mvp_referenceMapPoints;
+
 
 		long unsigned int mi_maxKFid;
 	};

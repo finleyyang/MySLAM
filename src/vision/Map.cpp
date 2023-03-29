@@ -57,6 +57,11 @@ namespace my_slam
 
 	std::vector<MapPoint*> Map::GetReferenceMapPoints()
 	{
+		return mvp_referenceMapPoints;
+	}
 
+	void Map::SetReferenceMapPoints(std::vector<MapPoint*> vpmP)
+	{
+		mvp_referenceMapPoints = vpmP;
 	}
 }

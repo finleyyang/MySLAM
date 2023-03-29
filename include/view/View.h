@@ -1,26 +1,19 @@
 /******************************************************************************
-*  FILE_NAME  : Draw.h
+*  FILE_NAME  : View.h
 *  AUTHER     : finley
-*  DATA       : 23-3-28
+*  DATA       : 23-3-29
 *  BRIEF      :
 *  Email      : finleyyang@163.com
 ******************************************************************************/
 
-#ifndef MYSLAM_SRC_VISION_DRAW_H_
-#define MYSLAM_SRC_VISION_DRAW_H_
+#ifndef MYSLAM_INCLUDE_VIEW_VIEW_H_
+#define MYSLAM_INCLUDE_VIEW_VIEW_H_
 #pragma once
-
-#include "vision/Frame.h"
-#include "vision/KeyFrame.h"
-#include "vision/MapPoint.h"
-#include "vision/Map.h"
-
 namespace my_slam
 {
-
-	class Draw
+	class View
 	{
 	};
 }
 
-#endif //MYSLAM_SRC_VISION_DRAW_H_
+#endif //MYSLAM_INCLUDE_VIEW_VIEW_H_

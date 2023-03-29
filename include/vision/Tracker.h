@@ -15,11 +15,19 @@
 #include "vision/MapPoint.h"
 #include "vision/LocalMap.h"
 
+#include "view/Draw.h"
+#include "view/FrameDraw.h"
+#include "view/View.h"
+
 namespace my_slam
 {
 	class Frame;
 	class KeyFrame;
 	class LocalMap;
+
+	class Draw;
+	class FrameDraw;
+	class View;
 
 	class Tracker
 	{
@@ -37,6 +45,9 @@ namespace my_slam
 			LOST=3
 		};
 
+		e_TrackingState m_State;
+		e_TrackingState m_lastProcessedState;
+
 	 protected:
 		void LoadParam();
 
@@ -53,9 +64,14 @@ namespace my_slam
 		Frame m_lastFrame;
 
 		KeyFrame* mp_lastKeyFrame;
+		KeyFrame* mp_referenceKeyFrame;
 
 		std::vector<KeyFrame*> mvp_localKeyFrames;
 		std::vector<MapPoint*> mvp_localMapPoints;
+
+		Draw* mp_draw;
+		FrameDraw* mp_frameDraw;
+		View* mp_view;
 
 		unsigned int mi_LastKeyFrameId;
 
