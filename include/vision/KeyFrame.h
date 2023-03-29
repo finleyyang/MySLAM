@@ -19,11 +19,10 @@ namespace my_slam
 	class KeyFrame : public Frame
 	{
 	 public:
-		KeyFrame();
-
-		~KeyFrame();
 
 		KeyFrame(Frame& F, Map* p_map);
+
+		~KeyFrame();
 
 		void AddMapPoint(MapPoint* pmp, const size_t &idx);
 
@@ -37,9 +36,26 @@ namespace my_slam
 
 		bool mb_Bad;
 
-		long unsigned int m_KFId;
+		std::vector<cv::KeyPoint> mv_keypoints;
+		std::vector<cv::KeyPoint> mv_keypointsRight;
+
+		//对应右目的像素坐标
+		std::vector<float> mv_uRight;
+		std::vector<float> mv_Depth;
+
+		cv::Mat m_K;
+		cv::Mat m_D;
+
+		long unsigned int mi_KFId;
 		static long unsigned int m_LastId;
 		static long unsigned int m_FrameId;
+
+	 protected:
+		// const只能在函数初始化列表中声明
+		const float fx, fy, cx, cy, invfx, invfy;
+
+		//*cw,世界坐标转相机坐标
+		Eigen::Matrix4d m_Tcw;
 
 	};
 }

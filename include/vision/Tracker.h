@@ -13,11 +13,13 @@
 #include "vision/Frame.h"
 #include "vision/KeyFrame.h"
 #include "vision/MapPoint.h"
+#include "vision/LocalMap.h"
 
 namespace my_slam
 {
 	class Frame;
 	class KeyFrame;
+	class LocalMap;
 
 	class Tracker
 	{
@@ -45,6 +47,19 @@ namespace my_slam
 	 public:
 
 		Map* mp_map;
+
+		LocalMap* mp_localMap;
+
+		Frame m_lastFrame;
+
+		KeyFrame* mp_lastKeyFrame;
+
+		std::vector<KeyFrame*> mvp_localKeyFrames;
+		std::vector<MapPoint*> mvp_localMapPoints;
+
+		unsigned int mi_LastKeyFrameId;
+
+		unsigned int mi_LastRelocFrameId;
 	};
 }
 

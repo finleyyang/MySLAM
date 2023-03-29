@@ -10,12 +10,13 @@ namespace my_slam
 
 	Frame::~Frame() = default;
 
+	Frame::Frame(Frame const &F) : m_image(F.m_image), m_imageRight(F.m_imageRight)
+	{
+
+	};
+
 	Frame::Frame(const cv::Mat& image_, const cv::Mat& imageright_, const cv::Mat& K_, const cv::Mat& D_) : m_image(
-		image_.clone()),
-	                                                                                                        m_imageRight(
-		                                                                                                        imageright_.clone()),
-	                                                                                                        m_K(K_.clone()),
-	                                                                                                        m_D(D_.clone())
+		image_.clone()), m_imageRight(imageright_.clone()), m_K(K_.clone()), m_D(D_.clone())
 	{
 		m_cols = m_image.cols;
 		m_rows = m_image.rows;

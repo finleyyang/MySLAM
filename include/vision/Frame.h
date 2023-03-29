@@ -24,6 +24,8 @@ namespace my_slam
 
 		~Frame();
 
+		Frame(Frame const &F);
+
 		Frame(const cv::Mat& image, const cv::Mat& imageright, const cv::Mat& K, const cv::Mat& D);
 
 		void ExtractORB();
@@ -40,6 +42,7 @@ namespace my_slam
 		void ShowORB() const;
 
 		void showstereomatch();
+
 	 public:
 		cv::Mat m_image, m_imageRight;
 
@@ -65,7 +68,6 @@ namespace my_slam
 		//m_bf = baseline * length_focal
 		float m_bf{386.1448};
 
-	 protected:
 		cv::Mat m_K;
 		cv::Mat m_D;
 
@@ -73,6 +75,10 @@ namespace my_slam
 
 		//*cw,世界坐标转相机坐标
 		Eigen::Matrix4d m_Tcw;
+
+		int mi_FId;
+
+	 protected:
 		Eigen::Matrix3d m_Rcw;
 		Eigen::Vector3d m_tcw;
 		Eigen::Matrix3d m_Rwc;

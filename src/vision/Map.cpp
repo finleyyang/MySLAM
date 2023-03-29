@@ -15,23 +15,48 @@ namespace my_slam
 
 	void Map::AddKeyFrame(KeyFrame* pkf)
 	{
-		mp_keyFrames.insert(pkf);
-		if (pkf->m_KFId > m_maxKFid)
-			m_maxKFid = pkf->m_KFId;
+		msp_keyFrames.insert(pkf);
+		if (pkf->mi_KFId > mi_maxKFid)
+			mi_maxKFid = pkf->mi_KFId;
 	}
 
 	void Map::AddMapPoint(MapPoint* pmp)
 	{
-		mp_mapPoints.insert(pmp);
+		msp_mapPoints.insert(pmp);
 	}
 
 	void Map::EraseKeyFrame(KeyFrame* pkf)
 	{
-		mp_keyFrames.erase(pkf);
+		msp_keyFrames.erase(pkf);
 	}
 
 	void Map::EraseMapPoint(MapPoint* pmp)
 	{
-		mp_mapPoints.erase(pmp);
+		msp_mapPoints.erase(pmp);
+	}
+
+	long unsigned int Map::NumMapPointsinMap()
+	{
+		return msp_mapPoints.size();
+	}
+
+	long unsigned int Map::NumKeyFrameinMap()
+	{
+		return msp_keyFrames.size();
+	}
+
+	std::vector<KeyFrame*> Map::GetAllKeyFrames()
+	{
+		return std::vector<KeyFrame*>(msp_keyFrames.begin(),msp_keyFrames.end());
+	}
+
+	std::vector<MapPoint*> Map::GetAllMapPoints()
+	{
+		return std::vector<MapPoint*>(msp_mapPoints.begin(), msp_mapPoints.end());
+	}
+
+	std::vector<MapPoint*> Map::GetReferenceMapPoints()
+	{
+
 	}
 }

@@ -7,6 +7,8 @@
 ******************************************************************************/
 #include "vision/Tracker.h"
 
+#include <spdlog/spdlog.h>
+
 namespace my_slam
 {
 
@@ -53,7 +55,15 @@ namespace my_slam
 					m_currentFrame.mvp_mapPoints[i]= pMapPoint;
 				}
 			}
-			//TO_DO
+			spdlog::info("The Map is created with {:04.2f} points", mp_map->NumMapPointsinMap());
+
+			mp_localMap->InsertKeyFrame(pKFini);
+
+			m_lastFrame = m_currentFrame;
+			mi_LastKeyFrameId = m_currentFrame.mi_FId;
+			mp_lastKeyFrame = pKFini;
+
+			mvp_localKeyFrames.push_back(pKFini);
 		}
 	}
 }

@@ -30,11 +30,21 @@ namespace my_slam
 
 		void EraseMapPoint(MapPoint *pmp);
 
-	 protected:
-		std::set<MapPoint*> mp_mapPoints;
-		std::set<KeyFrame*> mp_keyFrames;
+		long unsigned int NumMapPointsinMap();
 
-		long unsigned int m_maxKFid;
+		long unsigned int NumKeyFrameinMap();
+
+		std::vector<KeyFrame*> GetAllKeyFrames();
+
+		std::vector<MapPoint*> GetAllMapPoints();
+
+		std::vector<MapPoint*> GetReferenceMapPoints();
+
+	 protected:
+		std::set<MapPoint*> msp_mapPoints;
+		std::set<KeyFrame*> msp_keyFrames;
+
+		long unsigned int mi_maxKFid;
 	};
 }
 #endif //MYSLAM_SRC_MAP_H_
