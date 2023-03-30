@@ -18,7 +18,7 @@ namespace my_slam
 	KeyFrame::KeyFrame(Frame& F, Map* p_map)
 		: mv_Depth(F.mv_Depth), mv_keypoints(F.mv_keypoints), mv_keypointsRight(F.mv_keypointsRight),
 		  mv_uRight(F.mv_uRight), m_K(F.m_K), m_D(F.m_D), fx(F.fx), fy(F.fy), cx(F.cx), cy(F.cy), invfy(F.invfy),
-		  invfx(F.invfx), mp_map(p_map)
+		  invfx(F.invfx), m_descriptors(F.m_descriptors),mp_map(p_map)
 	{
 
 	}

@@ -9,7 +9,10 @@
 #ifndef MYSLAM_SRC_MAPPOINT_H_
 #define MYSLAM_SRC_MAPPOINT_H_
 #pragma one
+
+#include "vision/Frame.h"
 #include "vision/KeyFrame.h"
+
 namespace my_slam
 {
 	class KeyFrame;

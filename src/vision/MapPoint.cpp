@@ -48,7 +48,7 @@ namespace my_slam
 		{
 			KeyFrame* pKF = mit->first;
 			if(!pKF->isBad())
-				vDescriptors.push_back(pKF->m_descriptorsRight.row(mit->second));
+				vDescriptors.push_back(pKF->m_descriptors.row(mit->second));
 		}
 
 		if(vDescriptors.empty())

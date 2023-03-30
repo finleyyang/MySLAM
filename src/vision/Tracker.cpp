@@ -23,7 +23,17 @@ namespace my_slam
 
 	void Tracker::Tracking()
 	{
+		if (m_State == NO_IMAGES_YET)
+		{
+			m_State = NOT_INITIALIZED;
+		}
 
+		m_lastProcessedState = m_State;
+
+		if(m_State == NOT_INITIALIZED)
+		{
+			StereoInitial();
+		}
 	}
 
 	void Tracker::StereoInitial()

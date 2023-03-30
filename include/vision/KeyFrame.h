@@ -9,14 +9,19 @@
 #ifndef MYSLAM_SRC_KEYFRAME_H_
 #define MYSLAM_SRC_KEYFRAME_H_
 #pragma one
+
 #include "vision/Frame.h"
 #include "vision/Map.h"
+
+
 namespace my_slam
 {
 	class Map;
 	class MapPoint;
+	class Frame;
 
-	class KeyFrame : public Frame
+
+	class KeyFrame
 	{
 	 public:
 
@@ -45,6 +50,11 @@ namespace my_slam
 
 		cv::Mat m_K;
 		cv::Mat m_D;
+
+		cv::Mat m_descriptors;
+
+		int N{};
+
 
 		long unsigned int mi_KFId;
 		static long unsigned int m_LastId;

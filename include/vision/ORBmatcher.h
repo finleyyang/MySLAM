@@ -12,7 +12,6 @@
 #include <opencv2/opencv.hpp>
 namespace my_slam
 {
-	class Frame;
 
 	class ORBMatcher
 	{

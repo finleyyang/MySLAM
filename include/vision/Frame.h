@@ -73,7 +73,7 @@ namespace my_slam
 		cv::Mat m_K;
 		cv::Mat m_D;
 
-		static float fx, fy, cx, cy, invfx, invfy;
+		float fx, fy, cx, cy, invfx, invfy;
 
 		//*cw,世界坐标转相机坐标
 		Eigen::Matrix4d m_Tcw;
