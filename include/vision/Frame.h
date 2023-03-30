@@ -65,6 +65,8 @@ namespace my_slam
 
 		std::vector<MapPoint*> mvp_mapPoints;
 
+		std::vector<bool> mvb_Outlier;
+
 		float m_b{0.537};
 		//z = bf / d;
 		//m_bf = baseline * length_focal

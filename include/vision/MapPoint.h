@@ -31,6 +31,8 @@ namespace my_slam
 
 		void ComputeDistinctiveDescriptors();
 
+		int Observations();
+
 	 protected:
 		Eigen::Vector3d m_worldPose;
 
@@ -40,7 +42,7 @@ namespace my_slam
 
 		Map* mp_map;
 
-		int nObs;
+		int m_Obs;
 
 		cv::Mat m_descriptor;
 	};

@@ -63,6 +63,8 @@ namespace my_slam
 
 		Frame m_lastFrame;
 
+		cv::Mat m_imgGray;
+
 		KeyFrame* mp_lastKeyFrame;
 		KeyFrame* mp_referenceKeyFrame;
 
@@ -72,6 +74,11 @@ namespace my_slam
 		Draw* mp_draw;
 		FrameDraw* mp_frameDraw;
 		View* mp_view;
+
+		bool mb_onlyTracking;
+
+		Frame m_initialFrame;
+		std::vector<int> mv_iniMatches;
 
 		unsigned int mi_LastKeyFrameId;
 

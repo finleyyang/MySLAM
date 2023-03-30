@@ -82,4 +82,8 @@ namespace my_slam
 		}
 		m_descriptor = vDescriptors[BestIdx].clone();
 	}
+	int MapPoint::Observations()
+	{
+		return m_Obs;
+	}
 }

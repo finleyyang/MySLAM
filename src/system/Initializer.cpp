@@ -5,7 +5,7 @@
 *  BRIEF      :
 *  Email      : finleyyang@163.com
 ******************************************************************************/
-#include "vision/Initializer.h"
+#include "system/Initializer.h"
 
 namespace my_slam
 {
