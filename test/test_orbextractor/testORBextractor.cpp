@@ -23,12 +23,13 @@ int main(){
 	cv::Mat D = (cv::Mat_<double>(5,1)<< 0, 0, 0, 0, 0);
 	image = cv::imread("/home/finley/CODE/MySLAM/data/image_00/data/0000000000.png");
 	imageright = cv::imread("/home/finley/CODE/MySLAM/data/image_01/data/0000000000.png");
-	my_slam::Frame frame(image, imageright, K, D);
+	float b;
+	my_slam::Frame frame(image, imageright, K, D, b);
 	frame.ExtractORB();
 
 	end = clock();
 	double time_s = double((end-start))/CLOCKS_PER_SEC * 1000;
 	spdlog::debug("ORBextractor cost time is {:03.5f} ms", time_s);
 
-	frame.ShowORB();
+	//frame.ShowORB();
 }

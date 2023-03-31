@@ -22,7 +22,8 @@ int main()
 	imageright = cv::imread("/home/finley/CODE/MySLAM/data/image_01/data/0000000000.png", cv::IMREAD_GRAYSCALE);
 	//std::cout<<image.size()<<std::endl;
 	//std::cout<<imageright.size()<<std::endl;
-	my_slam::Frame frame(image, imageright, K, D);
+	float b = 0.537;
+	my_slam::Frame frame(image, imageright, K, D, b);
 	frame.StereoMatch();
 	frame.showstereomatch();
 }

@@ -6,7 +6,9 @@
 *  Email      : finleyyang@163.com
 ******************************************************************************/
 #include "system/Tracker.h"
+#include "Eigen/src/Core/Matrix.h"
 
+#include <opencv2/imgproc.hpp>
 #include <spdlog/spdlog.h>
 
 namespace my_slam
@@ -21,6 +23,29 @@ namespace my_slam
 
 	}
 
+	Eigen::Matrix4d Tracker::LoadStereoRGB(const cv::Mat& imRectLeft, const cv::Mat& imRectRight, const double& timestamp)
+	{
+		m_imgGray = imRectLeft;
+		cv::Mat imGrayRight = imRectRight;
+
+		if (m_imgGray.channels() == 3)
+		{
+			cv::cvtColor(m_imgGray, m_imgGray, cv::COLOR_BGR2GRAY);
+			cv::cvtColor(imGrayRight, imGrayRight, cv::COLOR_BGR2GRAY);
+		}
+		if(m_imgGray.channels() == 4)
+		{
+			cv::cvtColor(m_imgGray, m_imgGray, cv::COLOR_BGRA2GRAY);
+			cv::cvtColor(imGrayRight, imGrayRight, cv::COLOR_BGRA2GRAY);
+		}
+
+		m_currentFrame = Frame(m_imgGray, imGrayRight, K, D, m_b);
+
+		Tracking();
+
+		return m_currentFrame.m_Tcw;
+	}
+
 	void Tracker::Tracking()
 	{
 		if (m_State == NO_IMAGES_YET)
@@ -33,13 +58,28 @@ namespace my_slam
 		if(m_State == NOT_INITIALIZED)
 		{
 			StereoInitial();
+
+			if(m_State!=OK)
+				return;
+
+			mp_frameDraw->Update(this);
 		}
+		else
+		{
+			bool b_OK;
+
+		}
+
+
+
+
 	}
 
 	void Tracker::StereoInitial()
 	{
 		if (m_currentFrame.N > 500)
 		{
+
 			m_currentFrame.SetPose(Eigen::Matrix4d::Identity());
 
 			KeyFrame* pKFini = new KeyFrame(m_currentFrame, mp_map);

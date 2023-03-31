@@ -26,7 +26,7 @@ namespace my_slam
 		cv::Mat m_img;
 		std::vector<cv::KeyPoint> mv_CurrentKeys;
 		int N;
-		bool mb_onlyTracking;
+
 		std::vector<bool>mvb_VO, mvb_map;
 
 		std::vector<cv::KeyPoint> mv_iniKeys;

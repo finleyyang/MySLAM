@@ -28,7 +28,7 @@ namespace my_slam
 
 		m_observations[pKF] = idx;
 
-		nObs++;
+		m_Obs++;
 	}
 
 	void MapPoint::ComputeDistinctiveDescriptors()

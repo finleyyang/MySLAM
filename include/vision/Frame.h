@@ -28,7 +28,7 @@ namespace my_slam
 
 		Frame(Frame const &F);
 
-		Frame(const cv::Mat& image, const cv::Mat& imageright, const cv::Mat& K, const cv::Mat& D);
+		Frame(const cv::Mat& image, const cv::Mat& imageright, const cv::Mat& K, const cv::Mat& D, const float& b);
 
 		void ExtractORB();
 
@@ -67,7 +67,7 @@ namespace my_slam
 
 		std::vector<bool> mvb_Outlier;
 
-		float m_b{0.537};
+		float m_b;
 		//z = bf / d;
 		//m_bf = baseline * length_focal
 		float m_bf{386.1448};

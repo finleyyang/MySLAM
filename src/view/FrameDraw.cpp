@@ -18,15 +18,8 @@ namespace my_slam{
 		mvb_VO = std::vector<bool>(N,false);
 		mvb_map = std::vector<bool>(N,false);
 
-		mb_onlyTracking = pTracker->mb_onlyTracking;
 
-
-		if(pTracker->m_lastProcessedState==Tracker::NOT_INITIALIZED)
-		{
-			mv_iniKeys=pTracker->m_initialFrame.mv_keypoints;
-			mv_iniMatches=pTracker->mv_iniMatches;
-		}
-		else if(pTracker->m_lastProcessedState==Tracker::OK)
+		if(pTracker->m_lastProcessedState==Tracker::OK)
 		{
 			for(int i=0;i<N;i++)
 			{

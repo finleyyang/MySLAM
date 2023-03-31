@@ -48,14 +48,21 @@ namespace my_slam
 		e_TrackingState m_State;
 		e_TrackingState m_lastProcessedState;
 
-	 protected:
+	 public:
 		void LoadParam();
+
+		Eigen::Matrix4d LoadStereoRGB(const cv::Mat &imRectLeft, const cv::Mat &imRectRight, const double &timestamp);
 
 		void Tracking();
 
 		void StereoInitial();
 
 	 public:
+
+		cv::Mat K;
+		cv::Mat D;
+
+		float m_b;
 
 		Map* mp_map;
 
