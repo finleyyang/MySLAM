@@ -2,4 +2,5 @@ build/
 .idea/
 data/
 release/
-
+Thirdparty/
+Vocabulary/
