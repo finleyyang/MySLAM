@@ -7,6 +7,8 @@
 ******************************************************************************/
 #include "system/Tracker.h"
 #include "Eigen/src/Core/Matrix.h"
+#include "vision/MapPoint.h"
+#include "vision/ORBmatcher.h"
 
 #include <opencv2/imgproc.hpp>
 #include <spdlog/spdlog.h>
@@ -14,7 +16,10 @@
 namespace my_slam
 {
 
-	Tracker::Tracker() = default;
+	Tracker::Tracker()
+	{
+		m_Velocity = Eigen::Matrix4d::Zero();
+	};
 
 	Tracker::~Tracker() = default;
 
@@ -67,7 +72,12 @@ namespace my_slam
 		else
 		{
 			bool b_OK;
+			CheckReplacedPointInLastFrame();
 
+			if(m_Velocity == Eigen::Matrix4d::Zero()||m_currentFrame.mi_FId < mi_LastRelocFrameId + 2)
+			{
+				b_OK = TrackReferenceKeyFrame();
+			}
 		}
 
 
@@ -98,7 +108,7 @@ namespace my_slam
 
 					pKFini->AddMapPoint(pMapPoint, i);
 
-					pMapPoint->ComputeDistinctiveDescriptors();
+					pMapPoint->ComputeBestDistinctiveDescriptors();
 
 					mp_map->AddMapPoint(pMapPoint);
 
@@ -125,5 +135,30 @@ namespace my_slam
 
 			m_State = OK;
 		}
+	}
+
+	void Tracker::CheckReplacedPointInLastFrame()
+	{
+		for (int i = 0; i < m_lastFrame.N; i++)
+		{
+			MapPoint* pmp = m_lastFrame.mvp_mapPoints[i];
+			if(pmp)
+			{
+				MapPoint* pRep = pmp->GetReplaced();
+				if(pRep)
+					m_lastFrame.mvp_mapPoints[i] = pRep;
+			}
+		}
+	}
+	bool Tracker::TrackReferenceKeyFrame()
+	{
+		m_currentFrame.ComputeBoW();
+
+		ORBMatcher matcher(0.7, true);
+
+		std::vector<MapPoint*> vpMapPointsMatches;
+
+		int nmatches = matcher.SearchByBoW(mp_referenceKeyFrame, m_currentFrame, vpMapPointsMatches);
+
 	}
 }

@@ -36,6 +36,8 @@ include_directories(
         ${CERES_INCLUDE_DIRS}
         ${Pangolin_INCLUDE_DIRS}
         ${spdlog_INCLUDE_DIRS}
+        ${PROJECT_SOURCE_DIR}/Thirdparty/DBoW2/DBoW2
+        ${PROJECT_SOURCE_DIR}/Thirdparty/g2o/g2o
 )
 
 target_link_libraries(${MySLAM_LIBNAME}
@@ -44,6 +46,9 @@ target_link_libraries(${MySLAM_LIBNAME}
         ${CERES_LIBS}
         ${Pangolin_LIBS}
         ${spdlog_LIBS}
+
+        ${PROJECT_SOURCE_DIR}/Thirdparty/DBoW2/lib/libDBoW2.so
+        ${PROJECT_SOURCE_DIR}/Thirdparty/g2o/lib/libg2o.so
         )
 add_subdirectory(test)
 

@@ -9,9 +9,15 @@
 #include <Eigen/Eigen>
 #include <spdlog/spdlog.h>
 
+#include "BowVector.h"
+#include "FeatureVector.h"
+
+#include "vision/ORBvocabulary.h"
 #include "vision/ORBextractor.h"
 #include "vision/ORBmatcher.h"
 #include "vision/KeyFrame.h"
+
+#include "utility/Converter.h"
 
 namespace my_slam
 {
@@ -40,6 +46,8 @@ namespace my_slam
 
 		void UpdatePose();
 
+		void ComputeBoW();
+
 		// using for test
 		void ShowORB() const;
 
@@ -52,7 +60,8 @@ namespace my_slam
 
 		int N{};
 
-		ORBExtractor* ORBextractor{}, * ORBextractorRight{};
+		ORBvocabulary* mp_ORBvocabulary{};
+		ORBExtractor* mp_ORBextractor{}, * mp_ORBextractorRight{};
 
 		std::vector<cv::KeyPoint> mv_keypoints;
 		std::vector<cv::KeyPoint> mv_keypointsRight;
@@ -81,8 +90,15 @@ namespace my_slam
 		Eigen::Matrix4d m_Tcw;
 
 		int mi_FId;
+		static long unsigned int m_LastFId;
 
 		KeyFrame* mp_referenceKeyFrame;
+
+		//内部结构std::map<WordID, WordValue>
+		DBoW2::BowVector m_BowVec;
+
+		//内部实际储存std::map<NodeId, std::vector<unsigned int>>
+		DBoW2::FeatureVector m_FeatVec;
 
 	 protected:
 		Eigen::Matrix3d m_Rcw;

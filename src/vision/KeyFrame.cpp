@@ -11,7 +11,7 @@
 #include <utility>
 namespace my_slam
 {
-	long unsigned int KeyFrame::m_LastId = 0;
+	long unsigned int KeyFrame::m_LastKFId = 0;
 
 	KeyFrame::~KeyFrame() = default;
 
@@ -31,5 +31,9 @@ namespace my_slam
 	bool KeyFrame::isBad()
 	{
 		return mb_Bad;
+	}
+	std::vector<MapPoint*> KeyFrame::GetMapPoints()
+	{
+		return mvp_mapPoints;
 	}
 }

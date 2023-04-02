@@ -3,9 +3,14 @@
 //
 #include "vision/Frame.h"
 
+#include <opencv2/core/mat.hpp>
 #include <utility>
+#include <vector>
 namespace my_slam
 {
+
+	long unsigned int Frame::m_LastFId = 0;
+
 	Frame::Frame() = default;
 
 	Frame::~Frame() = default;
@@ -18,6 +23,7 @@ namespace my_slam
 	Frame::Frame(const cv::Mat& image_, const cv::Mat& imageright_, const cv::Mat& K_, const cv::Mat& D_, const float& b) : m_image(
 		image_.clone()), m_imageRight(imageright_.clone()), m_K(K_.clone()), m_D(D_.clone()), m_b(b)
 	{
+		mi_FId = m_LastFId++;
 		m_cols = m_image.cols;
 		m_rows = m_image.rows;
 		ExtractORB();
@@ -35,8 +41,8 @@ namespace my_slam
 
 	void Frame::ExtractORB()
 	{
-		(*ORBextractor)(m_image, mv_keypoints, m_descriptors);
-		(*ORBextractorRight)(m_imageRight, mv_keypointsRight, m_descriptorsRight);
+		(*mp_ORBextractor)(m_image, mv_keypoints, m_descriptors);
+		(*mp_ORBextractorRight)(m_imageRight, mv_keypointsRight, m_descriptorsRight);
 		N = int(mv_keypoints.size());
 	}
 
@@ -257,6 +263,16 @@ namespace my_slam
 				kpr.pt.x = mv_uRight[i];
 				std::cout << kpl.pt << " " << kpr.pt << std::endl;
 			}
+		}
+	}
+
+	void Frame::ComputeBoW()
+	{
+		if(m_BowVec.empty())
+		{
+			std::vector<cv::Mat> vCurrentDesc = Converter::toDescriptorVector(m_descriptors);
+
+			mp_ORBvocabulary->transform(vCurrentDesc, m_BowVec, m_FeatVec, 4);
 		}
 	}
 }

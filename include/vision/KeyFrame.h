@@ -33,6 +33,8 @@ namespace my_slam
 
 		bool isBad();
 
+		std::vector<MapPoint*> GetMapPoints();
+
 	 public:
 
 		Map* mp_map;
@@ -57,8 +59,14 @@ namespace my_slam
 
 
 		long unsigned int mi_KFId;
-		static long unsigned int m_LastId;
+		static long unsigned int m_LastKFId;
 		static long unsigned int m_FrameId;
+
+		//内部结构std::map<WordID, WordValue>
+		DBoW2::BowVector m_BowVec;
+
+		//内部实际储存std::map<NodeId, std::vector<unsigned int>>
+		DBoW2::FeatureVector m_FeatVec;
 
 	 protected:
 		// const只能在函数初始化列表中声明

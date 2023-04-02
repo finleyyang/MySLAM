@@ -28,12 +28,16 @@ namespace my_slam
 		{
 		case e_Sensor::MONOCULAR:
 			spdlog::info("The type sensor is {}", "MONOCULAR");
+			break;
 		case e_Sensor::STEREO:
 			spdlog::info("The type sensor is {}", "STEREO");
+			break;
 		case e_Sensor::RGBD:
 			spdlog::info("The type sensor is {}", "RGBD");
+			break;
 		case e_Sensor::IMU:
 			spdlog::info("The type sensor is {}", "IMU");
+			break;
 		}
 
 		mp_Tracker = new Tracker();

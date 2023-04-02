@@ -29,9 +29,13 @@ namespace my_slam
 
 		void AddObservation(KeyFrame* pKF,size_t idx);
 
-		void ComputeDistinctiveDescriptors();
+		void ComputeBestDistinctiveDescriptors();
 
 		int Observations();
+
+		MapPoint* GetReplaced();
+
+		bool isBad();
 
 	 protected:
 		Eigen::Vector3d m_worldPose;
@@ -45,6 +49,10 @@ namespace my_slam
 		int m_Obs;
 
 		cv::Mat m_descriptor;
+
+		MapPoint* mp_Replaced;
+
+		bool mb_Bad;
 	};
 }
 

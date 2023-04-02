@@ -31,7 +31,7 @@ namespace my_slam
 		m_Obs++;
 	}
 
-	void MapPoint::ComputeDistinctiveDescriptors()
+	void MapPoint::ComputeBestDistinctiveDescriptors()
 	{
 		std::vector<cv::Mat> vDescriptors;
 
@@ -61,7 +61,7 @@ namespace my_slam
 			Distances[i][i] = 0;
 			for(size_t j = 0; j < N; ++j)
 			{
-				int dist = ORBMatcher::calculateDescriptorDistance(vDescriptors[i], vDescriptors[j]);
+				int dist = ORBMatcher::CalculateDescriptorDistance(vDescriptors[i], vDescriptors[j]);
 				Distances[i][j] = dist;
 				Distances[j][i] = dist;
 			}
@@ -85,5 +85,14 @@ namespace my_slam
 	int MapPoint::Observations()
 	{
 		return m_Obs;
+	}
+
+	MapPoint* MapPoint::GetReplaced()
+	{
+		return mp_Replaced;
+	}
+	bool MapPoint::isBad()
+	{
+		return mb_Bad;
 	}
 }

@@ -35,8 +35,6 @@ namespace my_slam
 		Tracker();
 		~Tracker();
 
-		Frame m_currentFrame;
-
 		enum e_TrackingState{
 			SYSTEM_NOT_READY=-1,
 			NO_IMAGES_YET=0,
@@ -57,6 +55,10 @@ namespace my_slam
 
 		void StereoInitial();
 
+		void CheckReplacedPointInLastFrame();
+
+		bool TrackReferenceKeyFrame();
+
 	 public:
 
 		cv::Mat K;
@@ -67,6 +69,8 @@ namespace my_slam
 		Map* mp_map;
 
 		LocalMap* mp_localMap;
+
+		Frame m_currentFrame;
 
 		Frame m_lastFrame;
 
@@ -82,14 +86,14 @@ namespace my_slam
 		FrameDraw* mp_frameDraw;
 		View* mp_view;
 
-		bool mb_onlyTracking;
-
 		Frame m_initialFrame;
 		std::vector<int> mv_iniMatches;
 
 		unsigned int mi_LastKeyFrameId;
 
 		unsigned int mi_LastRelocFrameId;
+
+		Eigen::Matrix4d m_Velocity;
 	};
 }
 
