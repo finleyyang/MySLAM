@@ -158,7 +158,13 @@ namespace my_slam
 
 		std::vector<MapPoint*> vpMapPointsMatches;
 
-		int nmatches = matcher.SearchByBoW(mp_referenceKeyFrame, m_currentFrame, vpMapPointsMatches);
+		int nmatches = matcher.SearchByBoW(mp_referenceKeyFrame, &m_currentFrame, vpMapPointsMatches);
+
+		if(nmatches<15)
+		{
+			spdlog::warn("Track {0:d}th frame by BoW fail, the reference KeyFrame is {0:d}", m_currentFrame.mi_FId, mp_referenceKeyFrame->mi_KFId);
+			return false;
+		}
 
 	}
 }

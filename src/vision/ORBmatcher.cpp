@@ -122,7 +122,7 @@ namespace my_slam
 							//统计匹配点的旋转直方图
 							if (mb_CheckOrientation)
 							{
-								float rot = kp.angle - F.mv_keypoints[bestIdxF].angle;
+								float rot = kp.angle - F->mv_keypoints[bestIdxF].angle;
 								if (rot < 0.0)
 									rot += 360.0f;
 
@@ -145,7 +145,7 @@ namespace my_slam
 			}
 			else
 			{
-				Fit = F.m_FeatVec.lower_bound(KFit->first);
+				Fit = F->m_FeatVec.lower_bound(KFit->first);
 			}
 		}
 		//筛选3，根据方向剔除误匹配的点
