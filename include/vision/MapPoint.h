@@ -37,6 +37,8 @@ namespace my_slam
 
 		bool isBad();
 
+		Eigen::Vector3d GetWorldPose();
+
 	 protected:
 		Eigen::Vector3d m_worldPose;
 

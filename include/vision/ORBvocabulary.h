@@ -10,8 +10,8 @@
 #define MYSLAM_INCLUDE_VISION_ORBVOCABULARY_H_
 #pragma once
 
-#include "FORB.h"
-#include "TemplatedVocabulary.h"
+#include "DBoW2/FORB.h"
+#include "DBoW2/TemplatedVocabulary.h"
 
 namespace my_slam
 {

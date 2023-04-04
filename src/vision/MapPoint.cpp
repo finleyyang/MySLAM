@@ -95,4 +95,8 @@ namespace my_slam
 	{
 		return mb_Bad;
 	}
+	Eigen::Vector3d MapPoint::GetWorldPose()
+	{
+		return m_worldPose;
+	}
 }

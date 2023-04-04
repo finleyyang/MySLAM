@@ -9,8 +9,8 @@
 #include <Eigen/Eigen>
 #include <spdlog/spdlog.h>
 
-#include "BowVector.h"
-#include "FeatureVector.h"
+#include "DBoW2/BowVector.h"
+#include "DBoW2/FeatureVector.h"
 
 #include "vision/ORBvocabulary.h"
 #include "vision/ORBextractor.h"

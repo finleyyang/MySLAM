@@ -7,6 +7,8 @@
 ******************************************************************************/
 
 #include "utility/Converter.h"
+#include "Eigen/src/Core/Matrix.h"
+#include <opencv2/core/types.hpp>
 
 namespace my_slam
 {
@@ -20,5 +22,21 @@ namespace my_slam
 			vDesc.push_back(Descriptors.row(j));
 
 		return vDesc;
+	}
+	g2o::SE3Quat Converter::toSE3Quat(const Eigen::Matrix4d& cvT)
+	{
+		Eigen::Matrix3d R;
+		R = cvT.block<3, 3>(0, 0);
+		Eigen::Vector3d t;
+		t = cvT.block<3, 1>(0, 3);
+		return g2o::SE3Quat(R, t);
+	}
+	Eigen::Matrix4d Converter::toMatrix4d(const g2o::SE3Quat& SE3)
+	{
+		return SE3.to_homogeneous_matrix();
+	}
+	cv::Point3f Converter::toPoint3f(const Eigen::Vector3d& Point)
+	{
+		return {static_cast<float>(Point.x()), static_cast<float>(Point.y()), static_cast<float>(Point.z())};
 	}
 }

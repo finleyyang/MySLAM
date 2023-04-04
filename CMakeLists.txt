@@ -28,6 +28,7 @@ find_package(OpenCV REQUIRED)
 find_package(Ceres REQUIRED)
 find_package(Pangolin REQUIRED)
 find_package(spdlog REQUIRED)
+find_package()
 
 
 include_directories(
@@ -36,8 +37,8 @@ include_directories(
         ${CERES_INCLUDE_DIRS}
         ${Pangolin_INCLUDE_DIRS}
         ${spdlog_INCLUDE_DIRS}
-        ${PROJECT_SOURCE_DIR}/Thirdparty/DBoW2/DBoW2
-        ${PROJECT_SOURCE_DIR}/Thirdparty/g2o/g2o
+        ${PROJECT_SOURCE_DIR}/Thirdparty/DBoW2
+        ${PROJECT_SOURCE_DIR}/Thirdparty/g2o
 )
 
 target_link_libraries(${MySLAM_LIBNAME}

@@ -6,7 +6,7 @@
 *  Email      : finleyyang@163.com
 ******************************************************************************/
 #include "vision/ORBmatcher.h"
-#include "FeatureVector.h"
+#include "DBoW2/FeatureVector.h"
 #include "vision/MapPoint.h"
 #include <opencv2/core/types.hpp>
 #include <vector>
