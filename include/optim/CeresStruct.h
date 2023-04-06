@@ -52,7 +52,7 @@ namespace my_slam
 			predictions[1] = vp;
 		}
 
-		static ceres::CostFunction* Creat(Eigen::Vector3d p3, cv::Point2f p2, cv::Mat K){
+		static ceres::CostFunction* Create(Eigen::Vector3d p3, cv::Point2f p2, cv::Mat K){
 			return (new ceres::AutoDiffCostFunction<ReprojectionErrorPosOptim, 2, 3, 3>(new ReprojectionErrorPosOptim(p3, p2, K)));
 		}
 

@@ -147,46 +147,61 @@ namespace my_slam
 
 		int nInitialCorrespondences = 0;
 
-		ceres::Problem problem;
-
-		std::vector<cv::Point3f> vP3f;
-		std::vector<cv::Point2f> vP2f;
+		std::vector<Eigen::Vector3d> p3ds;
+		std::vector<cv::Point2f> p2ds;
 
 		for (int i = 0; i < N; i++)
 		{
 			MapPoint* pmp = pF->mvp_mapPoints[i];
 			if (pmp)
 			{
-				vP3f.emplace_back(Converter::toPoint3f(pmp->GetWorldPose()));
-				vP2f.emplace_back(pF->mv_keypoints[i].pt);
 				nInitialCorrespondences++;
 				pF->mvb_Outlier[i] = false;
+				p3ds.emplace_back(pmp->GetWorldPose());
+				p2ds.emplace_back(pF->mv_keypoints[i].pt);
 			}
 		}
 		int nBad = 0;
-		cv::Mat r, t;
 		double ceresRot[3], ceresTrans[3];
-		cv::solvePnP(vP3f, vP2f, pF->m_K, cv::Mat(), r, t, false, cv::SOLVEPNP_EPNP);
-		ceresRot[0] = r.at<double>(0);
-		ceresRot[1] = r.at<double>(1);
-		ceresRot[2] = r.at<double>(2);
-		ceresTrans[0] = t.at<double>(0);
-		ceresTrans[1] = t.at<double>(1);
-		ceresTrans[2] = t.at<double>(2);
-		for(int i = 0; i < N; i++)
+		auto poseR = pF -> m_Rcw;
+		auto poset = pF -> m_tcw;
+		Eigen::AngleAxisd R(poseR);
+		ceresTrans[0] = poset[0];
+		ceresTrans[1] = poset[1];
+		ceresTrans[2] = poset[2];
+
+		ceresRot[0] = R.axis()[0] * R.angle();
+		ceresRot[1] = R.axis()[1] * R.angle();
+		ceresRot[2] = R.axis()[2] * R.angle();
+
+		ceres::Problem problem;
+		for (size_t i = 0; i < p3ds.size(); i++)
 		{
-			MapPoint* pmp = pF -> mvp_mapPoints[i];
-			if(pmp&&!pF->mvb_Outlier[i])
-			{
-				Eigen::Vector3d pointPose = pmp -> GetWorldPose();
-				cv::Point2f imagePointPose;
-				imagePointPose.x = pF -> mv_keypoints[i].pt.x;
-				imagePointPose.y = pF -> mv_keypoints[i].pt.y;
-				ceres::CostFunction *costFunction = ReprojectionErrorPosOptim::Creat(pointPose, imagePointPose, pF->m_K);
-				problem.AddResidualBlock(costFunction, NULL, ceresRot, ceresTrans);
-			}
-			ceres::Solver::Options option;
+			ceres::LossFunction* loss = new ceres::HuberLoss(0.5);
+			problem.AddResidualBlock(ReprojectionErrorPosOptim::Create(p3ds[i], p2ds[i], pF->m_K),
+				loss,
+				ceresRot,
+				ceresTrans);
 		}
-		return 0;
+
+		// set ceres solver
+		ceres::Solver::Options options;
+		ceres::Solver::Summary summary;
+		options.linear_solver_type = ceres::DENSE_SCHUR;
+		options.minimizer_progress_to_stdout = true;
+		options.max_num_iterations = 30;
+
+		// solve the BA problem
+		ceres::Solve(options, &problem, &summary);
+
+		for(int i = 0; i<p3ds.size(); i++)
+		{
+
+		}
+
+		pF->SetPose(Converter::toMatrix4d(ceresRot, ceresTrans));
+		spdlog::info("Get the {0:d}th frame pose by Ceres, the pose is", pF->mi_FId);
+		std::cout<<Converter::toMatrix4d(ceresRot, ceresTrans)<<std::endl;
+		return nInitialCorrespondences - nBad;
 	}
 }

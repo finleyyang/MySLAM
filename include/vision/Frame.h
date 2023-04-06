@@ -100,7 +100,6 @@ namespace my_slam
 		//内部实际储存std::map<NodeId, std::vector<unsigned int>>
 		DBoW2::FeatureVector m_FeatVec;
 
-	 protected:
 		Eigen::Matrix3d m_Rcw;
 		Eigen::Vector3d m_tcw;
 		Eigen::Matrix3d m_Rwc;
