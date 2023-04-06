@@ -39,6 +39,20 @@ namespace my_slam
 
 		Eigen::Vector3d GetWorldPose();
 
+		float mf_trackProjX;
+
+		float mf_trackProjY;
+
+		float mf_trackProjXR;
+
+		bool mb_trackInView;
+
+		float mf_trackViewCos;
+
+		long unsigned int mi_trackReferenceForFrame;
+
+		long unsigned int mi_lastFrameSeen;
+
 	 protected:
 		Eigen::Vector3d m_worldPose;
 

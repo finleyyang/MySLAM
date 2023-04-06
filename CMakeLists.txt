@@ -28,7 +28,6 @@ find_package(OpenCV REQUIRED)
 find_package(Ceres REQUIRED)
 find_package(Pangolin REQUIRED)
 find_package(spdlog REQUIRED)
-find_package()
 
 
 include_directories(

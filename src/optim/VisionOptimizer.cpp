@@ -21,7 +21,7 @@
 namespace my_slam
 {
 
-	int Optimizer::PoseOptimG2O(Frame* pF)
+	int VisionOptimizer::PoseOptimG2O(Frame* pF)
 	{
 		g2o::SparseOptimizer optimizer;
 		g2o::BlockSolver_6_3::LinearSolverType* linearSolver;
@@ -141,7 +141,7 @@ namespace my_slam
 		return nInitialCorrespondences - nBad;
 	}
 
-	int Optimizer::PoseOptimCeres(Frame* pF)
+	int VisionOptimizer::PoseOptimCeres(Frame* pF)
 	{
 		const int N = pF->N;
 

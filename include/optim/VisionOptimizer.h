@@ -24,7 +24,7 @@
 
 namespace my_slam
 {
-	class Optimizer
+	class VisionOptimizer
 	{
 	 public:
 		//只优化当前帧的位姿

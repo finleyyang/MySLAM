@@ -122,7 +122,7 @@ namespace my_slam
 				if (uR < maxU && uR > minU)
 				{
 					const cv::Mat& dR = m_descriptorsRight.row(iR);
-					const int dist = ORBMatcher::calculateDescriptorDistance(dL, dR);
+					const int dist = ORBMatcher::CalculateDescriptorDistance(dL, dR);
 
 					if (dist < v_bestDist)
 					{

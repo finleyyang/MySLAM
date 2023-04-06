@@ -59,6 +59,12 @@ namespace my_slam
 
 		bool TrackReferenceKeyFrame();
 
+		void UpdateLastFrame();
+
+		bool TrackWithMotionModel();
+
+		bool Relocalization();
+
 	 public:
 
 		cv::Mat K;

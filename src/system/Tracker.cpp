@@ -7,6 +7,7 @@
 ******************************************************************************/
 #include "system/Tracker.h"
 #include "Eigen/src/Core/Matrix.h"
+#include "optim/VisionOptimizer.h"
 #include "vision/MapPoint.h"
 #include "vision/ORBmatcher.h"
 
@@ -53,18 +54,18 @@ namespace my_slam
 
 	void Tracker::Tracking()
 	{
-		if (m_State == NO_IMAGES_YET)
+		if (m_State == e_TrackingState::NO_IMAGES_YET)
 		{
-			m_State = NOT_INITIALIZED;
+			m_State = e_TrackingState::NOT_INITIALIZED;
 		}
 
 		m_lastProcessedState = m_State;
 
-		if(m_State == NOT_INITIALIZED)
+		if(m_State == e_TrackingState::NOT_INITIALIZED)
 		{
 			StereoInitial();
 
-			if(m_State!=OK)
+			if(m_State!=e_TrackingState::OK)
 				return;
 
 			mp_frameDraw->Update(this);
@@ -72,12 +73,29 @@ namespace my_slam
 		else
 		{
 			bool b_OK;
-			CheckReplacedPointInLastFrame();
-
-			if(m_Velocity == Eigen::Matrix4d::Zero()||m_currentFrame.mi_FId < mi_LastRelocFrameId + 2)
+			if (m_State == e_TrackingState::OK)
 			{
-				b_OK = TrackReferenceKeyFrame();
+				CheckReplacedPointInLastFrame();
+
+				if (m_Velocity == Eigen::Matrix4d::Zero() || m_currentFrame.mi_FId < mi_LastRelocFrameId + 2)
+				{
+					b_OK = TrackReferenceKeyFrame();
+				}
+				else
+				{
+					b_OK = TrackWithMotionModel();
+					if (!b_OK)
+						b_OK = TrackReferenceKeyFrame();
+				}
 			}
+			else
+			{
+				spdlog::warn("Tracker: Tracking: Tracking Lost!!! Relocal");
+				b_OK = Relocalization();
+			}
+
+			m_currentFrame.mp_referenceKeyFrame = mp_referenceKeyFrame;
+
 		}
 
 
@@ -115,7 +133,7 @@ namespace my_slam
 					m_currentFrame.mvp_mapPoints[i]= pMapPoint;
 				}
 			}
-			spdlog::info("The Map is created with {:04.2f} points", mp_map->NumMapPointsinMap());
+			spdlog::info("Tracker: StereoInitial: The Map is created with {:04.2f} points", mp_map->NumMapPointsinMap());
 
 			mp_localMap->InsertKeyFrame(pKFini);
 
@@ -150,8 +168,10 @@ namespace my_slam
 			}
 		}
 	}
+
 	bool Tracker::TrackReferenceKeyFrame()
 	{
+		spdlog::info("Tracker: TrackReferenceKeyFrame: Track by KeyFrame");
 		m_currentFrame.ComputeBoW();
 
 		ORBMatcher matcher(0.7, true);
@@ -162,9 +182,52 @@ namespace my_slam
 
 		if(nmatches<15)
 		{
-			spdlog::warn("Track {0:d}th frame by BoW fail, the reference KeyFrame is {0:d}", m_currentFrame.mi_FId, mp_referenceKeyFrame->mi_KFId);
+			spdlog::warn("Tracker: TrackReferenceKeyFrame: Track {0:d}th frame by BoW fail, the reference KeyFrame is {0:d}", m_currentFrame.mi_FId, mp_referenceKeyFrame->mi_KFId);
 			return false;
 		}
+		m_currentFrame.mvp_mapPoints = vpMapPointsMatches;
+		m_currentFrame.SetPose(m_lastFrame.m_Tcw);
+
+		VisionOptimizer::PoseOptimG2O(&m_currentFrame);
+
+		int nmatchesMap = 0;
+		for(int i =0; i<m_currentFrame.N; i++)
+		{
+			if(m_currentFrame.mvp_mapPoints[i])
+			{
+				//如果对应的这个点为外点
+				if(m_currentFrame.mvb_Outlier[i])
+				{
+					//从当前帧把这个数据删除
+					MapPoint* pMP = m_currentFrame.mvp_mapPoints[i];
+
+					m_currentFrame.mvp_mapPoints[i] = static_cast<MapPoint*>(NULL);
+					m_currentFrame.mvb_Outlier[i] = false;
+					pMP->mb_trackInView = false;
+					pMP->mi_lastFrameSeen = m_currentFrame.mi_FId;
+					nmatches--;
+				}
+				else if(m_currentFrame.mvp_mapPoints[i]->Observations()>0)
+					nmatchesMap++;
+			}
+		}
+		// 跟踪成功的数目超过10才认为跟踪成功，否则跟踪失败
+		if(nmatches > 10)
+			spdlog::info("Tracker: TrackReferenceKeyFrame: Track by KeyFrame success");
+		else
+			spdlog::warn("Tracker: TrackReferenceKeyFrame: Track by KeyFrame fail");
+		return nmatchesMap>=10;
+	}
+
+	void Tracker::UpdateLastFrame()
+	{
+		m_currentFrame.SetPose(m_Velocity * m_lastFrame.m_Tcw);
+	}
+
+	bool Tracker::TrackWithMotionModel()
+	{
+		spdlog::info("Tracker: TrackReferenceKeyFrame: Track by MotionModel");
+		ORBMatcher matcher(0.9,true);
 
 	}
 }
