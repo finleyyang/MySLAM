@@ -9,6 +9,7 @@
 #include "Eigen/src/Core/Matrix.h"
 #include "optim/CeresStruct.h"
 #include "utility/Converter.h"
+#include "vision/Frame.h"
 #include "vision/MapPoint.h"
 #include <ceres/cost_function.h>
 #include <ceres/problem.h>
@@ -89,8 +90,6 @@ namespace my_slam
 		if (nInitialCorrespondences < 3)
 			return 0;
 
-		const float chi2Stereo[4] = { 7.815, 7.815, 7.815, 7.815 };
-		const int its[4] = { 10, 10, 10, 10 };
 
 		int nBad = 0;
 		for (size_t it = 0; it < 4; it++)
@@ -196,7 +195,10 @@ namespace my_slam
 
 		for(int i = 0; i<p3ds.size(); i++)
 		{
-
+			cv::Point2f point = pF -> Reprojection(i, Converter::toMatrix4d(ceresRot, ceresTrans));
+			double error = pow(pF->mv_keypoints[i].pt.x - point.x, 2) + pow(pF->mv_keypoints[i].pt.y - point.y, 2);
+			if(error > chi2Stereo[0])
+				pF->mvb_Outlier[i] = true;
 		}
 
 		pF->SetPose(Converter::toMatrix4d(ceresRot, ceresTrans));

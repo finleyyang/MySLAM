@@ -2,8 +2,10 @@
 // Created by finley on 23-3-17.
 //
 #include "vision/Frame.h"
+#include "vision/MapPoint.h"
 
 #include <opencv2/core/mat.hpp>
+#include <opencv2/core/types.hpp>
 #include <utility>
 #include <vector>
 namespace my_slam
@@ -228,10 +230,21 @@ namespace my_slam
 			const float x = (u-cx)*z*invfx;
 			const float y = (v-cy)*z*invfy;
 			Eigen::Vector3d x3Dc(x, y, z);
+
+			// Rwc * x3D + twc(m_Ow) 相机坐标转世界坐标
 			return m_Rwc*x3Dc+m_Ow;
 		}
 		else
 			return Eigen::Vector3d();
+	}
+
+	cv::Point2f Frame::Reprojection(int i, Eigen::Matrix4d pose)
+	{
+		// Rcw * x3D + tcw  世界坐标转相机坐标
+		Eigen::Vector3d cameraPointPose = pose.block<3, 3>(0, 0) * mvp_mapPoints[i]->GetWorldPose() + pose.block<3, 1>(0, 3);
+		Eigen::Vector3d cameraPointPoseUn(cameraPointPose.x() / cameraPointPose.z(), cameraPointPose.y() / cameraPointPose.z(), 1);
+		//相机坐标转图像坐标
+		return cv::Point2f (fx * cameraPointPoseUn.x() + cx, fy * cameraPointPoseUn.y() + cy);
 	}
 
 	void Frame::SetPose(Eigen::Matrix4d Tcw)

@@ -4,6 +4,7 @@
 
 #ifndef MYSLAM_FRAME_H
 #define MYSLAM_FRAME_H
+#include <opencv2/core/types.hpp>
 #pragma one
 #include <opencv2/opencv.hpp>
 #include <Eigen/Eigen>
@@ -41,6 +42,8 @@ namespace my_slam
 		void StereoMatch();
 
 		Eigen::Vector3d UnprojectStereo(const int &i);
+
+		cv::Point2f Reprojection(int i, Eigen::Matrix4d pose);
 
 		void SetPose(Eigen::Matrix4d Tcw);
 
