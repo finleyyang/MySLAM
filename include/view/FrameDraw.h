@@ -10,6 +10,7 @@
 #define MYSLAM_INCLUDE_VIEW_FRAMEDRAW_H_
 #pragma once
 #include "system/Tracker.h"
+#include "vision/Map.h"
 namespace my_slam
 {
 	class Tracker;
@@ -17,8 +18,8 @@ namespace my_slam
 	class FrameDraw
 	{
 	 public:
-		FrameDraw() = default;
-		~FrameDraw() = default;
+		FrameDraw(Map* pMap);
+		~FrameDraw();
 
 		void Update(Tracker* pTracker);
 
@@ -27,6 +28,7 @@ namespace my_slam
 		std::vector<cv::KeyPoint> mv_CurrentKeys;
 		int N;
 
+		Map* mp_Map;
 		std::vector<bool>mvb_VO, mvb_map;
 
 		std::vector<cv::KeyPoint> mv_iniKeys;

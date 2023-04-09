@@ -59,8 +59,8 @@ namespace my_slam
 
 
 		long unsigned int mi_KFId;
-		static long unsigned int m_LastKFId;
-		static long unsigned int m_FrameId;
+		static long unsigned int mi_LastKFId;
+		const long unsigned int mi_FrameId;
 
 		//内部结构std::map<WordID, WordValue>
 		DBoW2::BowVector m_BowVec;

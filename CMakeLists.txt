@@ -43,7 +43,7 @@ include_directories(
 target_link_libraries(${MySLAM_LIBNAME}
         ${OpenCV_LIBS}
         ${EIGEN3_LIBS}
-        ${CERES_LIBS}
+        ${CERES_LIBRARIES}
         ${Pangolin_LIBS}
         ${spdlog_LIBS}
 

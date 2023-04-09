@@ -6,7 +6,9 @@
 *  Email      : finleyyang@163.com
 ******************************************************************************/
 #include "vision/MapPoint.h"
+#include "optim/VisionOptimizer.h"
 
+#include <iterator>
 #include <utility>
 namespace my_slam
 {
@@ -39,10 +41,8 @@ namespace my_slam
 
 		observations = m_observations;
 
-		if(observations.empty())
+		if (observations.empty())
 			return;
-
-		vDescriptors.resize(observations.size());
 
 		for(std::map<KeyFrame*, size_t>::iterator mit = observations.begin(), mend = observations.end(); mit!=mend; mit++)
 		{

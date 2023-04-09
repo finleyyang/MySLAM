@@ -12,15 +12,18 @@
 #include "vision/KeyFrame.h"
 #include "vision/MapPoint.h"
 
+#include <set>
+#include <mutex>
+
 namespace my_slam
 {
 	class MapPoint;
 	class KeyFrame;
+
 	class Map
 	{
 	 public:
 		Map();
-		~Map();
 
 		void AddKeyFrame(KeyFrame *pkf);
 
@@ -46,14 +49,18 @@ namespace my_slam
 
 		std::vector<KeyFrame*> mvp_keyFrameOrigins;
 
-	 protected:
 		std::set<MapPoint*> msp_mapPoints;
 		std::set<KeyFrame*> msp_keyFrames;
 
 		std::vector<MapPoint*> mvp_referenceMapPoints;
 
+		std::set<int> a;
+		std::set<int> test;
 
 		long unsigned int mi_maxKFid;
+
+		std::mutex mMutexMap;
 	};
+
 }
 #endif //MYSLAM_SRC_MAP_H_

@@ -8,16 +8,18 @@
 
 #ifndef MYSLAM_SRC_VISION_LOCALMAP_H_
 #define MYSLAM_SRC_VISION_LOCALMAP_H_
-#pragma once
 
+#pragma once
+#include "vision/Map.h"
 #include "vision/KeyFrame.h"
 namespace my_slam
 {
 	class KeyFrame;
+	class Map;
 
 	class LocalMap{
 	 public:
-		LocalMap();
+		LocalMap(Map* pmp);
 		~LocalMap();
 
 		void InsertKeyFrame(KeyFrame *pKF);
@@ -26,7 +28,8 @@ namespace my_slam
 
 		std::list<KeyFrame*> ml_NewKeyFrames;
 
-		KeyFrame* mpCurrentKeyFrame;
+		KeyFrame* mp_currentKeyFrame;
+		Map* mp_Map;
 
 		bool mb_AbortBA;
 	};

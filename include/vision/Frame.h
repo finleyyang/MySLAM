@@ -35,7 +35,7 @@ namespace my_slam
 
 		Frame(Frame const &F);
 
-		Frame(const cv::Mat& image, const cv::Mat& imageright, const cv::Mat& K, const cv::Mat& D, const float& b);
+		Frame(const cv::Mat& image, const cv::Mat& imageright, const cv::Mat& K, const cv::Mat& D, const float& b, ORBvocabulary* pvoc);
 
 		void ExtractORB();
 
@@ -56,6 +56,8 @@ namespace my_slam
 
 		void showstereomatch();
 
+		void showinfomation();
+
 	 public:
 		cv::Mat m_image, m_imageRight;
 
@@ -63,7 +65,7 @@ namespace my_slam
 
 		int N{};
 
-		ORBvocabulary* mp_ORBvocabulary{};
+		ORBvocabulary* mp_ORBvocabulary;
 		ORBExtractor* mp_ORBextractor{}, * mp_ORBextractorRight{};
 
 		std::vector<cv::KeyPoint> mv_keypoints;

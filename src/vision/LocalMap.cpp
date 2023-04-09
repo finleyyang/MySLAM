@@ -10,7 +10,8 @@
 
 namespace my_slam{
 
-	LocalMap::LocalMap()=default;
+	LocalMap::LocalMap(Map* pmp):mp_Map(pmp), mb_AbortBA(false)
+	{};
 
 	LocalMap::~ LocalMap() = default;
 

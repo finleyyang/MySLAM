@@ -8,6 +8,7 @@
 
 #ifndef MYSLAM_SRC_VISION_TRACKER_H_
 #define MYSLAM_SRC_VISION_TRACKER_H_
+#include "vision/ORBvocabulary.h"
 #pragma one
 
 #include "vision/Frame.h"
@@ -32,7 +33,7 @@ namespace my_slam
 	class Tracker
 	{
 	 public:
-		Tracker();
+		Tracker(Map *pMap, Draw *pDraw, FrameDraw *pframeDraw, ORBvocabulary *pVoc);
 		~Tracker();
 
 		enum e_TrackingState{
@@ -47,7 +48,7 @@ namespace my_slam
 		e_TrackingState m_lastProcessedState;
 
 	 public:
-		void LoadParam();
+		void LoadParam(std::string strSettingPath);
 
 		Eigen::Matrix4d LoadStereoRGB(const cv::Mat &imRectLeft, const cv::Mat &imRectRight, const double &timestamp);
 
@@ -65,12 +66,17 @@ namespace my_slam
 
 		bool Relocalization();
 
+		void SetLocalMap(LocalMap* plocalMap);
+
 	 public:
 
 		cv::Mat K;
 		cv::Mat D;
 
 		float m_b;
+		float m_bf;
+
+		ORBvocabulary* mp_ORBvocabulary;
 
 		Map* mp_map;
 

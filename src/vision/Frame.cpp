@@ -22,23 +22,29 @@ namespace my_slam
 
 	};
 
-	Frame::Frame(const cv::Mat& image_, const cv::Mat& imageright_, const cv::Mat& K_, const cv::Mat& D_, const float& b) : m_image(
-		image_.clone()), m_imageRight(imageright_.clone()), m_K(K_.clone()), m_D(D_.clone()), m_b(b)
+	Frame::Frame(const cv::Mat& image_, const cv::Mat& imageright_, const cv::Mat& K_, const cv::Mat& D_, const float& b, ORBvocabulary* pvoc) : m_image(
+		image_.clone()), m_imageRight(imageright_.clone()), m_K(K_.clone()), m_D(D_.clone()), m_b(b), mp_ORBvocabulary(pvoc)
 	{
 		mi_FId = m_LastFId++;
+		spdlog::info("Frame: Process {0:d}th frame", mi_FId);
 		m_cols = m_image.cols;
 		m_rows = m_image.rows;
-		ExtractORB();
 
-		fx = m_K.at<double>(0, 0);
-		fy = m_K.at<double>(1, 1);
-		cx = m_K.at<double>(0, 2);
-		cy = m_K.at<double>(1, 2);
+		fx = m_K.at<float>(0, 0);
+		fy = m_K.at<float>(1, 1);
+		cx = m_K.at<float>(0, 2);
+		cy = m_K.at<float>(1, 2);
 
 		invfx = float(1.0)/fx;
 		invfy = float(1.0)/fy;
 
 		m_bf = m_b * ((fx + fy) / 2);
+
+		ExtractORB();
+		StereoMatch();
+
+		mvp_mapPoints = std::vector<MapPoint*>(N, static_cast<MapPoint*>(nullptr));
+		mvb_Outlier = std::vector<bool>(N, false);
 	}
 
 	void Frame::ExtractORB()
@@ -287,5 +293,11 @@ namespace my_slam
 
 			mp_ORBvocabulary->transform(vCurrentDesc, m_BowVec, m_FeatVec, 4);
 		}
+	}
+	void Frame::showinfomation()
+	{
+		std::cout<<"mv_keypoints:size()" << mv_keypoints.size()<<std::endl;
+		std::cout<<"mv_keypointsRight:size()"<< mv_keypointsRight.size()<<std::endl;
+		std::cout<< "mvp_mapPoints.size()"<<mvp_mapPoints.size()<<std::endl;
 	}
 }

@@ -8,6 +8,8 @@
 #include "system/Tracker.h"
 #include "Eigen/src/Core/Matrix.h"
 #include "optim/VisionOptimizer.h"
+#include "view/Draw.h"
+#include "view/FrameDraw.h"
 #include "vision/MapPoint.h"
 #include "vision/ORBmatcher.h"
 
@@ -17,16 +19,30 @@
 namespace my_slam
 {
 
-	Tracker::Tracker()
+	Tracker::Tracker(Map *pMap, Draw *pDraw, FrameDraw *pframeDraw, ORBvocabulary *pVoc):mp_map(pMap), mp_draw(pDraw), mp_frameDraw(pframeDraw), mp_ORBvocabulary(pVoc), m_State(NO_IMAGES_YET)
 	{
 		m_Velocity = Eigen::Matrix4d::Zero();
 	};
 
 	Tracker::~Tracker() = default;
 
-	void Tracker::LoadParam()
+	void Tracker::LoadParam(std::string strSettingPath)
 	{
+		cv::FileStorage fSettings(strSettingPath, cv::FileStorage::READ);
+		float fx = fSettings["Camera.fx"];
+		float fy = fSettings["Camera.fy"];
+		float cx = fSettings["Camera.cx"];
+		float cy = fSettings["Camera.cy"];
 
+
+		K = cv::Mat::eye(3,3,CV_32F);
+		K.at<float>(0,0) = fx;
+		K.at<float>(1,1) = fy;
+		K.at<float>(0,2) = cx;
+		K.at<float>(1,2) = cy;
+
+		m_bf = fSettings["Camera.bf"];
+		m_b =2 * m_bf / (fx + fy);
 	}
 
 	Eigen::Matrix4d Tracker::LoadStereoRGB(const cv::Mat& imRectLeft, const cv::Mat& imRectRight, const double& timestamp)
@@ -45,9 +61,12 @@ namespace my_slam
 			cv::cvtColor(imGrayRight, imGrayRight, cv::COLOR_BGRA2GRAY);
 		}
 
-		m_currentFrame = Frame(m_imgGray, imGrayRight, K, D, m_b);
+		m_currentFrame = Frame(m_imgGray, imGrayRight, K, D, m_b, mp_ORBvocabulary);
 
 		Tracking();
+
+		spdlog::info("Tracker: The pose of {:d}th frame is", m_currentFrame.mi_FId);
+		std::cout<<m_currentFrame.m_Tcw<<std::endl;
 
 		return m_currentFrame.m_Tcw;
 	}
@@ -105,10 +124,12 @@ namespace my_slam
 
 	void Tracker::StereoInitial()
 	{
-		if (m_currentFrame.N > 500)
+		if (m_currentFrame.N >= 500)
 		{
 
 			m_currentFrame.SetPose(Eigen::Matrix4d::Identity());
+
+			m_currentFrame.ComputeBoW();
 
 			KeyFrame* pKFini = new KeyFrame(m_currentFrame, mp_map);
 
@@ -133,7 +154,7 @@ namespace my_slam
 					m_currentFrame.mvp_mapPoints[i]= pMapPoint;
 				}
 			}
-			spdlog::info("Tracker: StereoInitial: The Map is created with {:04.2f} points", mp_map->NumMapPointsinMap());
+			spdlog::info("Tracker: StereoInitial: The Map is created with {0:d} points", mp_map->NumMapPointsinMap());
 
 			mp_localMap->InsertKeyFrame(pKFini);
 
@@ -182,7 +203,7 @@ namespace my_slam
 
 		if(nmatches<15)
 		{
-			spdlog::warn("Tracker: TrackReferenceKeyFrame: Track {0:d}th frame by BoW fail, the reference KeyFrame is {0:d}", m_currentFrame.mi_FId, mp_referenceKeyFrame->mi_KFId);
+			spdlog::warn("Tracker: TrackReferenceKeyFrame: Track {0:d}th frame by BoW fail, the reference KeyFrame is {1:d} (the Frame is {2:d})", m_currentFrame.mi_FId, mp_referenceKeyFrame->mi_KFId, mp_referenceKeyFrame->mi_FrameId);
 			return false;
 		}
 		m_currentFrame.mvp_mapPoints = vpMapPointsMatches;
@@ -229,5 +250,13 @@ namespace my_slam
 		spdlog::info("Tracker: TrackReferenceKeyFrame: Track by MotionModel");
 		ORBMatcher matcher(0.9,true);
 
+	}
+	bool Tracker::Relocalization()
+	{
+		return false;
+	}
+	void Tracker::SetLocalMap(LocalMap* plocalMap)
+	{
+		mp_localMap = plocalMap;
 	}
 }

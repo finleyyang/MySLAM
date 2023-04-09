@@ -17,17 +17,20 @@
 
 namespace my_slam
 {
+	class map;
 
 	class Draw
 	{
 	 public:
-		Draw();
+		Draw(Map *pmp);
 		~Draw();
 
 		void SetCurrentCameraPose(Eigen::Matrix4d &pose);
 
 	 public:
 		Eigen::Matrix4d m_CameraPose;
+
+		Map* mp_Map;
 	};
 }
 

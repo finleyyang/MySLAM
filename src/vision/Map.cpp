@@ -6,12 +6,13 @@
 *  Email      : finleyyang@163.com
 ******************************************************************************/
 #include "vision/Map.h"
+#include <mutex>
 
 namespace my_slam
 {
-	Map::Map() = default;
+	Map::Map() :mi_maxKFid(0){};
 
-	Map::~Map() = default;
+	//Map::~Map() = default;
 
 	void Map::AddKeyFrame(KeyFrame* pkf)
 	{

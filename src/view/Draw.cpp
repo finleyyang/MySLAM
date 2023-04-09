@@ -10,7 +10,7 @@
 
 namespace my_slam
 {
-	Draw::Draw()
+	Draw::Draw(Map *pmp):mp_Map(pmp)
 	{
 
 	}

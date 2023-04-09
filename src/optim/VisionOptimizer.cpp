@@ -139,7 +139,7 @@ namespace my_slam
 
 		return nInitialCorrespondences - nBad;
 	}
-
+/*
 	int VisionOptimizer::PoseOptimCeres(Frame* pF)
 	{
 		const int N = pF->N;
@@ -206,4 +206,5 @@ namespace my_slam
 		std::cout<<Converter::toMatrix4d(ceresRot, ceresTrans)<<std::endl;
 		return nInitialCorrespondences - nBad;
 	}
+ */
 }

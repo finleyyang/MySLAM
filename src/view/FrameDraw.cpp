@@ -9,6 +9,16 @@
 
 namespace my_slam{
 
+	FrameDraw::FrameDraw(my_slam::Map* pMap):mp_Map(pMap)
+	{
+
+	}
+
+	FrameDraw::~FrameDraw()
+	{
+
+	}
+
 	void FrameDraw::Update(Tracker* pTracker)
 	{
 		pTracker->m_imgGray.copyTo(m_img);
