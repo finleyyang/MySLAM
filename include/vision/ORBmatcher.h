@@ -45,7 +45,7 @@ namespace my_slam
 		void ComputeThreeMaxima(std::vector<int>* histo, const int L, int &ind1, int &ind2, int &ind3);
 
 		float mf_NNration;
-		bool mb_CheckOrientation;
+		bool mb_checkOrientation;
 	};
 }
 

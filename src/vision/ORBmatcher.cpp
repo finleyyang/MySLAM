@@ -21,7 +21,7 @@ namespace my_slam
 
 	ORBMatcher::~ORBMatcher() = default;
 
-	ORBMatcher::ORBMatcher(float nnratio, bool checkOri) : mf_NNration(nnratio), mb_CheckOrientation(checkOri)
+	ORBMatcher::ORBMatcher(float nnratio, bool checkOri) : mf_NNration(nnratio), mb_checkOrientation(checkOri)
 	{
 
 	}
@@ -120,7 +120,7 @@ namespace my_slam
 							const cv::KeyPoint& kp = pKF->mv_keypoints[realIdxKF];
 
 							//统计匹配点的旋转直方图
-							if (mb_CheckOrientation)
+							if (mb_checkOrientation)
 							{
 								float rot = kp.angle - F->mv_keypoints[bestIdxF].angle;
 								if (rot < 0.0)
@@ -149,7 +149,7 @@ namespace my_slam
 			}
 		}
 		//筛选3，根据方向剔除误匹配的点
-		if(mb_CheckOrientation)
+		if(mb_checkOrientation)
 		{
 			int ind1 = -1;
 			int ind2 = -1;

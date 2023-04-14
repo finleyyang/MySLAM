@@ -23,6 +23,7 @@ int main()
 	//std::cout<<image.size()<<std::endl;
 	//std::cout<<imageright.size()<<std::endl;
 	float b = 0.537;
-	my_slam::Frame frame(image, imageright, K, D, b);
+	my_slam::ORBvocabulary* pvoc;
+	my_slam::Frame frame(image, imageright, K, D, b, pvoc);
 	frame.showstereomatch();
 }

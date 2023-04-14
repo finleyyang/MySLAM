@@ -94,7 +94,7 @@ namespace my_slam
 		//*cw,世界坐标转相机坐标
 		Eigen::Matrix4d m_Tcw;
 
-		int mi_FId;
+		long unsigned int mi_FId;
 		static long unsigned int m_LastFId;
 
 		KeyFrame* mp_referenceKeyFrame;
