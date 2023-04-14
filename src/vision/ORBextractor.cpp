@@ -3,6 +3,7 @@
 //
 #include "vision/ORBextractor.h"
 #include <algorithm>
+#include <opencv2/core/types.hpp>
 
 namespace my_slam
 {
@@ -337,15 +338,11 @@ namespace my_slam
 		n4.BR = BR;
 		n4.mv_Keys.reserve(mv_Keys.size());
 
-		//Associate points to childs
-		//遍历当前提取器节点的vkeys中存储的特征点
+
 		for(size_t i=0;i<mv_Keys.size();i++)
 		{
 			//获取这个特征点对象
 			const cv::KeyPoint &kp = mv_Keys[i];
-			//判断这个特征点在当前特征点提取器节点图像的哪个区域，更严格地说是属于那个子图像区块
-			//然后就将这个特征点追加到那个特征点提取器节点的vkeys中
-			//NOTICE BUG REVIEW 这里也是直接进行比较的，但是特征点的坐标是在“半径扩充图像”坐标系下的，而节点区域的坐标则是在“边缘扩充图像”坐标系下的
 			if(kp.pt.x<n1.UR.x)
 			{
 				if(kp.pt.y<n1.BR.y)
@@ -448,11 +445,205 @@ namespace my_slam
 		detector->detect(image, keypoints);
 		descriptor->compute(image, keypoints, descriptors);
 	}
+
 	std::vector<cv::KeyPoint> ORBExtractor::DistributeQuadTree(const std::vector<cv::KeyPoint>& vToDistributeKeys,
 		const int& minX, const int& maxX, const int& minY, const int& maxY, const int& nFeatures, const int& level)
 	{
+		//初始化的，根据长宽比进行初始化分块，只划分X方向
+		const int nIni = round(static_cast<float>(maxX-minX)/(maxY-minY));
+		const float hX = static_cast<float>(maxX-minX)/nIni;
+		//初始化Node存储器
+		std::list<ExtractorNode> lNodes;
+		//存储初始提取器节点指针的vector
+		std::vector<ExtractorNode*> vpIniNodes;
+		vpIniNodes.resize(nIni);
+		//初始化节点
+		for (int i = 0; i < nIni; ++i)
+		{
+			ExtractorNode ni;
+			ni.UL = cv::Point2i(hX*static_cast<float>(i),0);
+			ni.UR = cv::Point2i(hX*static_cast<float>(i+1),0);
+			ni.BL = cv::Point2i(ni.UL.x,maxY-minY);
+			ni.BR = cv::Point2i(ni.UR.x,maxY-minY);
+			ni.mv_Keys.reserve(vToDistributeKeys.size());
+			lNodes.push_back(ni);
+			vpIniNodes[i] = &lNodes.back();
+		}
+		//将特征点划分到每一个节点中
+		for(const auto & kp : vToDistributeKeys)
+		{
+				vpIniNodes[kp.pt.x/hX]->mv_Keys.push_back(kp);
+		}
+		auto lit = lNodes.begin();
+		//删除区域中没有特征点的节点
+		while(lit != lNodes.end())
+		{
+			if(lit -> mv_Keys.size() == 1)
+			{
+				lit -> mb_NoMore = true;
+				lit++;
+			}
+			else if(lit->mv_Keys.empty())
+				lit = lNodes.erase(lit);
+			else
+				lit++;
+		}
+		bool bFinish = false;
+		int iteration = 0;
+		//声明一个vector用于存储节点的vSize和句柄对
+		//这个变量记录了在一次分裂循环中，那些可以再继续进行分裂的节点中包含的特征点数目和其句柄
+		std::vector<std::pair<int,ExtractorNode*> > vSizeAndPointerToNode;
+		vSizeAndPointerToNode.reserve(lNodes.size()*4);
+		while (!bFinish)
+		{
+			iteration++;
+			int prevSize = lNodes.size();
+			lit = lNodes.begin();
+			int nToExpand = 0;
+			//因为是在循环中，前面的循环体中可能污染了这个变量，所以清空
+			//这个变量也只是统计了某一个循环中的点
+			//这个变量记录了在一次分裂循环中，那些可以再继续进行分裂的节点中包含的特征点数目和其句柄
+			vSizeAndPointerToNode.clear();
+			while (lit != lNodes.end())
+			{
+				if(lit->mb_NoMore)
+				{
+					lit++;
+					continue;
+				}
+				else
+				{
+					ExtractorNode n1, n2, n3, n4;
+					lit->DivideNode(n1, n2, n3, n3);
+					if(!n1.mv_Keys.empty())
+					{
+						lNodes.push_front(n1);
+						if(n1.mv_Keys.size()>1)
+						{
+							nToExpand++;
+							vSizeAndPointerToNode.push_back(std::make_pair(n1.mv_Keys.size(),&lNodes.front()));
+							lNodes.front().lit = lNodes.begin();
+						}
+					}
+					if(!n2.mv_Keys.empty())
+					{
+						lNodes.push_front(n2);
+						if(n2.mv_Keys.size()>1)
+						{
+							nToExpand++;
+							vSizeAndPointerToNode.push_back(std::make_pair(n2.mv_Keys.size(),&lNodes.front()));
+							lNodes.front().lit = lNodes.begin();
+						}
+					}
+					if(!n3.mv_Keys.empty())
+					{
+						lNodes.push_front(n3);
+						if(n3.mv_Keys.size() > 1)
+						{
+							nToExpand++;
+							vSizeAndPointerToNode.push_back(std::make_pair(n3.mv_Keys.size(), &lNodes.front()));
+							lNodes.front().lit = lNodes.begin();
+						}
+					}
+					if(!n4.mv_Keys.empty())
+					{
+						lNodes.push_front(n4);
+						if(n4.mv_Keys.size() > 1)
+						{
+							nToExpand++;
+							vSizeAndPointerToNode.push_back(std::make_pair(n4.mv_Keys.size(), &lNodes.front()));
+							lNodes.front().lit = lNodes.begin();
+						}
+					}
+					lit=lNodes.erase(lit);
+					continue;
+				}
+			}
+			if(int(lNodes.size())>=nFeatures||int(lNodes.size())==prevSize)
+			{
+				bFinish = true;
+			}
+			//
+			else if((int(lNodes.size()) + nToExpand*3) > 3)
+			{
+				while (!bFinish)
+				{
+					prevSize = lNodes.size();
+					std::vector<std::pair<int,ExtractorNode*>> vPrevSizeAndPointerToNode = vSizeAndPointerToNode;
+					vSizeAndPointerToNode.clear();
+					//先划分特征点比较多的节点
+					sort(vPrevSizeAndPointerToNode.begin(),vPrevSizeAndPointerToNode.end());
+					for (int j=vPrevSizeAndPointerToNode.size()-1;j>=0;j--) {
+					    ExtractorNode n1, n2, n3, n4;
+						vPrevSizeAndPointerToNode[j].second->DivideNode(n1, n2, n3, n4);
+						if(!n1.mv_Keys.empty())
+						{
+							lNodes.push_front(n1);
+							if(n1.mv_Keys.size()>1)
+							{
+								nToExpand++;
+								vSizeAndPointerToNode.push_back(std::make_pair(n1.mv_Keys.size(),&lNodes.front()));
+							}
+						}
+						if(!n2.mv_Keys.empty())
+						{
+							lNodes.push_front(n2);
+							if(n2.mv_Keys.size()>1)
+							{
+								nToExpand++;
+								vSizeAndPointerToNode.push_back(std::make_pair(n2.mv_Keys.size(),&lNodes.front()));
+							}
+						}
+						if(!n3.mv_Keys.empty())
+						{
+							lNodes.push_front(n3);
+							if(n3.mv_Keys.size() > 1)
+							{
+								nToExpand++;
+								vSizeAndPointerToNode.push_back(std::make_pair(n3.mv_Keys.size(), &lNodes.front()));
+							}
+						}
+						if(!n4.mv_Keys.empty())
+						{
+							lNodes.push_front(n4);
+							if(n4.mv_Keys.size() > 1)
+							{
+								nToExpand++;
+								vSizeAndPointerToNode.push_back(std::make_pair(n4.mv_Keys.size(), &lNodes.front()));
+							}
+						}
+						lNodes.erase(vPrevSizeAndPointerToNode[j].second->lit);
+						if((int)lNodes.size()>=nFeatures)
+							break;
+					}
+					if((int)lNodes.size()>=nFeatures || (int)lNodes.size()==prevSize)
+						bFinish = true;
+				}
+			}
+		}
+		std::vector<cv::KeyPoint> vResultKeys;
+		vResultKeys.resize(nFeatures);
+		for(std::list<ExtractorNode>::iterator lit=lNodes.begin(); lit!=lNodes.end(); lit++)
+		{
+			std::vector<cv::KeyPoint> &vNodeKeys = lit->mv_Keys;
+			cv::KeyPoint* pKP = &vNodeKeys[0];
+			float maxResponse = pKP->response;
+			for(size_t k=1;k<vNodeKeys.size();k++)
+			{
+				if(vNodeKeys[k].response>maxResponse)
+				{
+					pKP = &vNodeKeys[k];
+					maxResponse = vNodeKeys[k].response;
+				}
+			}
+			vResultKeys.push_back(*pKP);
+		}
+		return vResultKeys;
+	}
 
-		return std::vector<cv::KeyPoint>();
+	void ORBExtractor::ComputeKeyPointsQuadTree(std::vector<std::vector<cv::KeyPoint>>& vvallkeypoints)
+	{
+
 	}
 
 }

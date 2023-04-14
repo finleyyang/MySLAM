@@ -4,6 +4,8 @@
 
 #ifndef MY_SLAM_ORBEXTRACTOR_H
 #define MY_SLAM_ORBEXTRACTOR_H
+#include <opencv2/core/types.hpp>
+#include <vector>
 #pragma one
 #include <opencv2/opencv.hpp>
 
@@ -35,8 +37,12 @@ namespace my_slam
 
 		std::vector<cv::Mat> mv_imagePyramid;
 	 protected:
+
 		std::vector<cv::KeyPoint> DistributeQuadTree(const std::vector<cv::KeyPoint>& vToDistributeKeys, const int &minX,
 			const int &maxX, const int &minY, const int &maxY, const int &nFeatures, const int &level);
+
+		void ComputeKeyPointsQuadTree(std::vector<std::vector<cv::KeyPoint>> &vvallkeypoints);
+
 		std::vector<cv::Point> pattern;
 		std::vector<int> mv_Max;
 		//计算一个半径为16的，圆的近似坐标
