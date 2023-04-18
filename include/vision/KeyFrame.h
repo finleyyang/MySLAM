@@ -20,7 +20,6 @@ namespace my_slam
 	class MapPoint;
 	class Frame;
 
-
 	class KeyFrame
 	{
 	 public:
@@ -29,7 +28,7 @@ namespace my_slam
 
 		~KeyFrame();
 
-		void AddMapPoint(MapPoint* pmp, const size_t &idx);
+		void AddMapPoint(MapPoint* pmp, const size_t& idx);
 
 		bool isBad();
 
@@ -56,7 +55,6 @@ namespace my_slam
 		cv::Mat m_descriptors;
 
 		int N{};
-
 
 		long unsigned int mi_KFId;
 		static long unsigned int mi_LastKFId;

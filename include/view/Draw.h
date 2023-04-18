@@ -22,10 +22,10 @@ namespace my_slam
 	class Draw
 	{
 	 public:
-		Draw(Map *pmp);
+		Draw(Map* pmp);
 		~Draw();
 
-		void SetCurrentCameraPose(Eigen::Matrix4d &pose);
+		void SetCurrentCameraPose(Eigen::Matrix4d& pose);
 
 	 public:
 		Eigen::Matrix4d m_CameraPose;

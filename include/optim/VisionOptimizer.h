@@ -34,7 +34,7 @@ namespace my_slam
 
 	 public:
 		constexpr static float chi2Stereo[4] = { 7.815, 7.815, 7.815, 7.815 };
-		constexpr static  int its[4] = { 10, 10, 10, 10 };
+		constexpr static int its[4] = { 10, 10, 10, 10 };
 	};
 }
 

@@ -10,7 +10,7 @@
 
 namespace my_slam
 {
-	Draw::Draw(Map *pmp):mp_Map(pmp)
+	Draw::Draw(Map* pmp) : mp_Map(pmp)
 	{
 
 	}
@@ -19,7 +19,7 @@ namespace my_slam
 	{
 
 	}
-	void Draw::SetCurrentCameraPose(Eigen::Matrix4d &pose)
+	void Draw::SetCurrentCameraPose(Eigen::Matrix4d& pose)
 	{
 		m_CameraPose = pose;
 	}

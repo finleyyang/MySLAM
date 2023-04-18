@@ -29,7 +29,7 @@ namespace my_slam
 		int N;
 
 		Map* mp_Map;
-		std::vector<bool>mvb_VO, mvb_map;
+		std::vector<bool> mvb_VO, mvb_map;
 
 		std::vector<cv::KeyPoint> mv_iniKeys;
 		std::vector<int> mv_iniMatches;

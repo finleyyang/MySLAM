@@ -33,15 +33,22 @@ namespace my_slam
 
 		~Frame();
 
-		Frame(Frame const &F);
+		Frame(Frame const& F);
 
-		Frame(const cv::Mat& image, const cv::Mat& imageright, const cv::Mat& K, const cv::Mat& D, const float& b, ORBvocabulary* pvoc);
+		Frame(const cv::Mat& image,
+			const cv::Mat& imageright,
+			const cv::Mat& K,
+			const cv::Mat& D,
+			const float& b,
+			ORBExtractor* orbExtractorleft,
+			ORBExtractor* orbExtractorright,
+			ORBvocabulary* pvoc);
 
 		void ExtractORB();
 
 		void StereoMatch();
 
-		Eigen::Vector3d UnprojectStereo(const int &i);
+		Eigen::Vector3d UnprojectStereo(const int& i);
 
 		cv::Point2f Reprojection(int i, Eigen::Matrix4d pose);
 
@@ -66,7 +73,7 @@ namespace my_slam
 		int N{};
 
 		ORBvocabulary* mp_ORBvocabulary;
-		ORBExtractor* mp_ORBextractor{}, * mp_ORBextractorRight{};
+		ORBExtractor* mp_ORBextractor, * mp_ORBextractorRight;
 
 		std::vector<cv::KeyPoint> mv_keypoints;
 		std::vector<cv::KeyPoint> mv_keypointsRight;
@@ -84,7 +91,7 @@ namespace my_slam
 		float m_b;
 		//z = bf / d;
 		//m_bf = baseline * length_focal
-		float m_bf{386.1448};
+		float m_bf{ 386.1448 };
 
 		cv::Mat m_K;
 		cv::Mat m_D;

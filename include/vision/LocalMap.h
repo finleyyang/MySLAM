@@ -17,12 +17,13 @@ namespace my_slam
 	class KeyFrame;
 	class Map;
 
-	class LocalMap{
+	class LocalMap
+	{
 	 public:
 		LocalMap(Map* pmp);
 		~LocalMap();
 
-		void InsertKeyFrame(KeyFrame *pKF);
+		void InsertKeyFrame(KeyFrame* pKF);
 
 	 protected:
 

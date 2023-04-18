@@ -27,13 +27,13 @@ namespace my_slam
 		ORBMatcher();
 		~ORBMatcher();
 
-		ORBMatcher(float nnratio, bool checkOri=true);
+		ORBMatcher(float nnratio, bool checkOri = true);
 
-		static int CalculateDescriptorDistance(const cv::Mat &a, const cv::Mat &b);
+		static int CalculateDescriptorDistance(const cv::Mat& a, const cv::Mat& b);
 
-		int SearchByBoW(KeyFrame *pKF, Frame *F, std::vector<MapPoint*> &vpMapPointMatches);
+		int SearchByBoW(KeyFrame* pKF, Frame* F, std::vector<MapPoint*>& vpMapPointMatches);
 
-		int SearchByBoW(KeyFrame *pKF1, KeyFrame* pKF2, std::vector<MapPoint*> &vpMatches12);
+		int SearchByBoW(KeyFrame* pKF1, KeyFrame* pKF2, std::vector<MapPoint*>& vpMatches12);
 
 	 public:
 		static const int TH_LOW;
@@ -42,7 +42,7 @@ namespace my_slam
 
 	 protected:
 
-		void ComputeThreeMaxima(std::vector<int>* histo, const int L, int &ind1, int &ind2, int &ind3);
+		void ComputeThreeMaxima(std::vector<int>* histo, const int L, int& ind1, int& ind2, int& ind3);
 
 		float mf_NNration;
 		bool mb_checkOrientation;

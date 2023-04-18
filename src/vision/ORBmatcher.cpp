@@ -28,14 +28,14 @@ namespace my_slam
 
 	int ORBMatcher::CalculateDescriptorDistance(const cv::Mat& a, const cv::Mat& b)
 	{
-		const int *pa = a.ptr<int32_t>();
-		const int *pb = b.ptr<int32_t>();
+		const int* pa = a.ptr<int32_t>();
+		const int* pb = b.ptr<int32_t>();
 
-		long int dist=0;
+		long int dist = 0;
 		// 8*32=256bit
-		for(int i=0; i<8; i++, pa++, pb++)
+		for (int i = 0; i < 8; i++, pa++, pb++)
 		{
-			unsigned  int v = *pa ^ *pb;
+			unsigned int v = *pa ^ *pb;
 			v = v - ((v >> 1) & 0x55555555);
 			v = (v & 0x33333333) + ((v >> 2) & 0x33333333);
 			dist += (((v + (v >> 4)) & 0xF0F0F0F) * 0x1010101) >> 24;
@@ -50,28 +50,28 @@ namespace my_slam
 
 		vpMapPointMatches = vector<MapPoint*>(F->N, static_cast<MapPoint*>(NULL));
 
-		const DBoW2::FeatureVector &vFeatVecKF = pKF -> m_FeatVec;
+		const DBoW2::FeatureVector& vFeatVecKF = pKF->m_FeatVec;
 
 		int nmatches = 0;
 
 		vector<int> rotHist[HISTO_LENGTH];
-		for(int i = 0; i < HISTO_LENGTH; i++)
+		for (int i = 0; i < HISTO_LENGTH; i++)
 			rotHist[i].resize(500);
 
-		const float factor = HISTO_LENGTH/360.0f;
+		const float factor = HISTO_LENGTH / 360.0f;
 
 		auto KFit = vFeatVecKF.begin();
 		auto Fit = F->m_FeatVec.begin();
 		auto KFend = vFeatVecKF.end();
 		auto Fend = F->m_FeatVec.end();
 
-		while(KFit != KFend && Fit != Fend)
+		while (KFit != KFend && Fit != Fend)
 		{
-			if(KFit -> first==Fit -> first)
+			if (KFit->first == Fit->first)
 			{
-				auto vIndicesKF = KFit -> second;
-				auto vIndicesF = Fit -> second;
-				for(size_t iKF = 0; iKF < vIndicesKF.size(); iKF++)
+				auto vIndicesKF = KFit->second;
+				auto vIndicesF = Fit->second;
+				for (size_t iKF = 0; iKF < vIndicesKF.size(); iKF++)
 				{
 					auto realIdxKF = vIndicesKF[iKF];
 
@@ -139,7 +139,7 @@ namespace my_slam
 				KFit++;
 				Fit++;
 			}
-			else if(KFit->first < Fit->first)
+			else if (KFit->first < Fit->first)
 			{
 				KFit = vFeatVecKF.lower_bound(Fit->first);
 			}
@@ -149,7 +149,7 @@ namespace my_slam
 			}
 		}
 		//筛选3，根据方向剔除误匹配的点
-		if(mb_checkOrientation)
+		if (mb_checkOrientation)
 		{
 			int ind1 = -1;
 			int ind2 = -1;
@@ -157,10 +157,11 @@ namespace my_slam
 
 			ComputeThreeMaxima(rotHist, HISTO_LENGTH, ind1, ind2, ind3);
 
-			for (int i = 0; i < HISTO_LENGTH; i++) {
-			    if(i == ind1||i == ind2||i == ind3)
-				    continue;
-				for(size_t j = 0, jend=rotHist[i].size(); j < jend; j++)
+			for (int i = 0; i < HISTO_LENGTH; i++)
+			{
+				if (i == ind1 || i == ind2 || i == ind3)
+					continue;
+				for (size_t j = 0, jend = rotHist[i].size(); j < jend; j++)
 				{
 					vpMapPointMatches[rotHist[i][j]] = static_cast<MapPoint*>(NULL);
 					nmatches--;
@@ -176,45 +177,45 @@ namespace my_slam
 	}
 	void ORBMatcher::ComputeThreeMaxima(std::vector<int>* histo, const int L, int& ind1, int& ind2, int& ind3)
 	{
-		int max1=0;
-		int max2=0;
-		int max3=0;
+		int max1 = 0;
+		int max2 = 0;
+		int max3 = 0;
 
-		for(int i=0; i<L; i++)
+		for (int i = 0; i < L; i++)
 		{
 			const int s = histo[i].size();
-			if(s>max1)
+			if (s > max1)
 			{
-				max3=max2;
-				max2=max1;
-				max1=s;
-				ind3=ind2;
-				ind2=ind1;
-				ind1=i;
+				max3 = max2;
+				max2 = max1;
+				max1 = s;
+				ind3 = ind2;
+				ind2 = ind1;
+				ind1 = i;
 			}
-			else if(s>max2)
+			else if (s > max2)
 			{
-				max3=max2;
-				max2=s;
-				ind3=ind2;
-				ind2=i;
+				max3 = max2;
+				max2 = s;
+				ind3 = ind2;
+				ind2 = i;
 			}
-			else if(s>max3)
+			else if (s > max3)
 			{
-				max3=s;
-				ind3=i;
+				max3 = s;
+				ind3 = i;
 			}
 		}
 
 		//如果差距太大，就放弃
-		if(max2<0.1f*(float)max1)
+		if (max2 < 0.1f * (float)max1)
 		{
-			ind2=-1;
-			ind3=-1;
+			ind2 = -1;
+			ind3 = -1;
 		}
-		else if(max3<0.1f*(float)max1)
+		else if (max3 < 0.1f * (float)max1)
 		{
-			ind3=-1;
+			ind3 = -1;
 		}
 	}
 }

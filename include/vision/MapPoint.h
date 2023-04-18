@@ -25,9 +25,9 @@ namespace my_slam
 
 		~MapPoint();
 
-		MapPoint(Eigen::Vector3d &Pos, KeyFrame* pRefKF, Map* pMap);
+		MapPoint(Eigen::Vector3d& Pos, KeyFrame* pRefKF, Map* pMap);
 
-		void AddObservation(KeyFrame* pKF,size_t idx);
+		void AddObservation(KeyFrame* pKF, size_t idx);
 
 		void ComputeBestDistinctiveDescriptors();
 

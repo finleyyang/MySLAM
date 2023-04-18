@@ -33,15 +33,16 @@ namespace my_slam
 	class Tracker
 	{
 	 public:
-		Tracker(Map *pMap, Draw *pDraw, FrameDraw *pframeDraw, ORBvocabulary *pVoc);
+		Tracker(Map* pMap, Draw* pDraw, FrameDraw* pframeDraw, ORBvocabulary* pVoc);
 		~Tracker();
 
-		enum e_TrackingState{
-			SYSTEM_NOT_READY=-1,
-			NO_IMAGES_YET=0,
-			NOT_INITIALIZED=1,
-			OK=2,
-			LOST=3
+		enum e_TrackingState
+		{
+			SYSTEM_NOT_READY = -1,
+			NO_IMAGES_YET = 0,
+			NOT_INITIALIZED = 1,
+			OK = 2,
+			LOST = 3
 		};
 
 		e_TrackingState m_State;
@@ -50,7 +51,7 @@ namespace my_slam
 	 public:
 		void LoadParam(std::string strSettingPath);
 
-		Eigen::Matrix4d LoadStereoRGB(const cv::Mat &imRectLeft, const cv::Mat &imRectRight, const double &timestamp);
+		Eigen::Matrix4d LoadStereoRGB(const cv::Mat& imRectLeft, const cv::Mat& imRectRight, const double& timestamp);
 
 		void Tracking();
 
@@ -97,6 +98,7 @@ namespace my_slam
 		Draw* mp_draw;
 		FrameDraw* mp_frameDraw;
 		View* mp_view;
+		ORBExtractor* mp_ORBextractorLeft, *mp_ORBextractorRight;
 
 		Frame m_initialFrame;
 		std::vector<int> mv_iniMatches;
@@ -106,6 +108,13 @@ namespace my_slam
 		unsigned int mi_LastRelocFrameId;
 
 		Eigen::Matrix4d m_Velocity;
+
+		int mi_Features;
+		float mf_scaleFactor;
+		int mi_Levels;
+		int mi_iniThFAST;
+		int mi_minThFAST;
+
 	};
 }
 

@@ -33,16 +33,20 @@ namespace my_slam
 		SLAMsystem();
 		~SLAMsystem();
 
-		enum e_Sensor{
-			MONOCULAR=0,
-			STEREO=1,
-			RGBD=2,
-			IMU=3
+		enum e_Sensor
+		{
+			MONOCULAR = 0,
+			STEREO = 1,
+			RGBD = 2,
+			IMU = 3
 		};
 
-		SLAMsystem(const std::string &strVocFile, const std::string &strSettingsFile, const e_Sensor sensor, const bool bUseViewer = true);
+		SLAMsystem(const std::string& strVocFile,
+			const std::string& strSettingsFile,
+			const e_Sensor sensor,
+			const bool bUseViewer = true);
 
-		void TrackStereoRGB(const cv::Mat &imLeft, const cv::Mat &imRight, const double &timestamp);
+		void TrackStereoRGB(const cv::Mat& imLeft, const cv::Mat& imRight, const double& timestamp);
 
 		void LoadParam();
 

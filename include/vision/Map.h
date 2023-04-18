@@ -25,13 +25,13 @@ namespace my_slam
 	 public:
 		Map();
 
-		void AddKeyFrame(KeyFrame *pkf);
+		void AddKeyFrame(KeyFrame* pkf);
 
-		void AddMapPoint(MapPoint *pmp);
+		void AddMapPoint(MapPoint* pmp);
 
-		void EraseKeyFrame(KeyFrame *pkf);
+		void EraseKeyFrame(KeyFrame* pkf);
 
-		void EraseMapPoint(MapPoint *pmp);
+		void EraseMapPoint(MapPoint* pmp);
 
 		long unsigned int NumMapPointsinMap();
 

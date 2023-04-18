@@ -44,14 +44,15 @@ namespace my_slam
 		if (observations.empty())
 			return;
 
-		for(std::map<KeyFrame*, size_t>::iterator mit = observations.begin(), mend = observations.end(); mit!=mend; mit++)
+		for (std::map<KeyFrame*, size_t>::iterator mit = observations.begin(), mend = observations.end(); mit != mend;
+		     mit++)
 		{
 			KeyFrame* pKF = mit->first;
-			if(!pKF->isBad())
+			if (!pKF->isBad())
 				vDescriptors.push_back(pKF->m_descriptors.row(mit->second));
 		}
 
-		if(vDescriptors.empty())
+		if (vDescriptors.empty())
 			return;
 
 		const size_t N = vDescriptors.size();
@@ -59,7 +60,7 @@ namespace my_slam
 		for (size_t i = 0; i < N; ++i)
 		{
 			Distances[i][i] = 0;
-			for(size_t j = 0; j < N; ++j)
+			for (size_t j = 0; j < N; ++j)
 			{
 				int dist = ORBMatcher::CalculateDescriptorDistance(vDescriptors[i], vDescriptors[j]);
 				Distances[i][j] = dist;
@@ -68,13 +69,13 @@ namespace my_slam
 		}
 		int BestMedian = INT_MAX;
 		int BestIdx = 0;
-		for(size_t i = 0; i < N; i++)
+		for (size_t i = 0; i < N; i++)
 		{
 			std::vector<int> vDists(Distances[i], Distances[i] + N);
 			std::sort(vDists.begin(), vDists.end());
-			int median = vDists[0.5*(N-1)];
+			int median = vDists[0.5 * (N - 1)];
 
-			if(median < BestMedian)
+			if (median < BestMedian)
 			{
 				BestMedian = median;
 				BestIdx = i;

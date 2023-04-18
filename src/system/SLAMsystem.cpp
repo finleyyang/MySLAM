@@ -60,16 +60,16 @@ namespace my_slam
 		mp_frameDraw = new FrameDraw(mp_Map);
 
 		mp_Tracker = new Tracker(mp_Map, mp_Draw, mp_frameDraw, mp_ORBvocabulary);
-		mp_Tracker ->LoadParam(strSettingsFile);
+		mp_Tracker->LoadParam(strSettingsFile);
 
 		mp_localMap = new LocalMap(mp_Map);
-		mp_Tracker ->SetLocalMap(mp_localMap);
+		mp_Tracker->SetLocalMap(mp_localMap);
 
 	}
 
 	void SLAMsystem::TrackStereoRGB(const cv::Mat& imLeft, const cv::Mat& imRight, const double& timestamp)
 	{
-		if(m_Sensor!=e_Sensor::STEREO)
+		if (m_Sensor != e_Sensor::STEREO)
 		{
 			spdlog::error("The sensor is not STEREO, but call the function of STEREO");
 		}

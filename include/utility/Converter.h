@@ -19,7 +19,7 @@ namespace my_slam
 	class Converter
 	{
 	 public:
-		static std::vector<cv::Mat> toDescriptorVector(const cv::Mat &Descriptors);
+		static std::vector<cv::Mat> toDescriptorVector(const cv::Mat& Descriptors);
 		static g2o::SE3Quat toSE3Quat(const Eigen::Matrix4d& cvT);
 		static Eigen::Matrix4d toMatrix4d(const g2o::SE3Quat& SE3);
 		static Eigen::Matrix4d toMatrix4d(const double R[3], const double t[3]);

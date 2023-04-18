@@ -18,7 +18,7 @@ namespace my_slam
 		std::vector<cv::Mat> vDesc;
 		vDesc.reserve(Descriptors.rows);
 
-		for (int j=0;j<Descriptors.rows;j++)
+		for (int j = 0; j < Descriptors.rows; j++)
 			vDesc.push_back(Descriptors.row(j));
 
 		return vDesc;
@@ -37,7 +37,7 @@ namespace my_slam
 	{
 		Eigen::Vector3d R_e;
 		Eigen::Vector3d t_e;
-		for(int i = 0; i< 3; i++)
+		for (int i = 0; i < 3; i++)
 		{
 			R_e[i] = R[i];
 			t_e[i] = t[i];
@@ -45,10 +45,10 @@ namespace my_slam
 		Eigen::Matrix4d mat4d = Eigen::Matrix4d::Identity();
 		Eigen::Matrix3d rot3d;
 		auto n2 = R_e.norm();
-		if(n2<std::numeric_limits<double>::epsilon())
+		if (n2 < std::numeric_limits<double>::epsilon())
 			rot3d = Eigen::AngleAxisd(n2, Eigen::Vector3d(0, 0, 1)).toRotationMatrix();
 		else
-			rot3d = Eigen::AngleAxisd (n2, R_e.normalized()).toRotationMatrix();
+			rot3d = Eigen::AngleAxisd(n2, R_e.normalized()).toRotationMatrix();
 
 		mat4d.block<3, 3>(0, 0) = rot3d;
 		mat4d.block<3, 1>(0, 3) = t_e;
@@ -62,6 +62,6 @@ namespace my_slam
 
 	cv::Point3f Converter::toPoint3f(const Eigen::Vector3d& Point)
 	{
-		return {static_cast<float>(Point.x()), static_cast<float>(Point.y()), static_cast<float>(Point.z())};
+		return { static_cast<float>(Point.x()), static_cast<float>(Point.y()), static_cast<float>(Point.z()) };
 	}
 }

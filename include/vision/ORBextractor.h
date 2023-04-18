@@ -33,15 +33,20 @@ namespace my_slam
 
 		~ORBExtractor();
 
-		void operator()(cv::InputArray image, std::vector<cv::KeyPoint>& keypoints, cv::Mat& descriptors);
+		void operator()(cv::InputArray _image, std::vector<cv::KeyPoint>& _keypoints,
+			cv::OutputArray _descriptors);
 
 		std::vector<cv::Mat> mv_imagePyramid;
+
+
 	 protected:
 
 		std::vector<cv::KeyPoint> DistributeQuadTree(const std::vector<cv::KeyPoint>& vToDistributeKeys, const int &minX,
 			const int &maxX, const int &minY, const int &maxY, const int &nFeatures, const int &level);
 
 		void ComputeKeyPointsQuadTree(std::vector<std::vector<cv::KeyPoint>> &vvallkeypoints);
+
+		void ComputePyramid(cv::Mat image);
 
 		std::vector<cv::Point> pattern;
 		std::vector<int> mv_Max;
@@ -50,7 +55,7 @@ namespace my_slam
 		float mf_scaleFactor;
 		int mi_Levels;
 		int mi_iniThFAST;
-		int mi_minnThFAST;
+		int mi_minThFAST;
 		std::vector<int> mv_featuresPerLevel;
 		std::vector<float> mv_scaleFactor; //金字塔各层级的缩放系数 这里的值为{1， 1.2， 1.44， 1.728， 2.074， 2.488， 2.986， 3.583}
 		std::vector<float> mv_invScaleFactor;    //金字塔各级缩放系数的倒数 这里的值为{1， 0.833， ...}

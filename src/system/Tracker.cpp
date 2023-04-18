@@ -19,7 +19,8 @@
 namespace my_slam
 {
 
-	Tracker::Tracker(Map *pMap, Draw *pDraw, FrameDraw *pframeDraw, ORBvocabulary *pVoc):mp_map(pMap), mp_draw(pDraw), mp_frameDraw(pframeDraw), mp_ORBvocabulary(pVoc), m_State(NO_IMAGES_YET)
+	Tracker::Tracker(Map* pMap, Draw* pDraw, FrameDraw* pframeDraw, ORBvocabulary* pVoc)
+		: mp_map(pMap), mp_draw(pDraw), mp_frameDraw(pframeDraw), mp_ORBvocabulary(pVoc), m_State(NO_IMAGES_YET)
 	{
 		m_Velocity = Eigen::Matrix4d::Zero();
 	};
@@ -34,18 +35,26 @@ namespace my_slam
 		float cx = fSettings["Camera.cx"];
 		float cy = fSettings["Camera.cy"];
 
-
-		K = cv::Mat::eye(3,3,CV_32F);
-		K.at<float>(0,0) = fx;
-		K.at<float>(1,1) = fy;
-		K.at<float>(0,2) = cx;
-		K.at<float>(1,2) = cy;
+		K = cv::Mat::eye(3, 3, CV_32F);
+		K.at<float>(0, 0) = fx;
+		K.at<float>(1, 1) = fy;
+		K.at<float>(0, 2) = cx;
+		K.at<float>(1, 2) = cy;
 
 		m_bf = fSettings["Camera.bf"];
-		m_b =2 * m_bf / (fx + fy);
+
+		mi_Features = fSettings["ORBextractor.nFeatures"];
+		mf_scaleFactor = fSettings["ORBextractor.scaleFactor"];
+		mi_Levels = fSettings["ORBextractor.nLevels"];
+		mi_iniThFAST = fSettings["ORBextractor.iniThFAST"];
+		mi_minThFAST = fSettings["ORBextractor.minThFAST"];
+
+		m_b = 2 * m_bf / (fx + fy);
 	}
 
-	Eigen::Matrix4d Tracker::LoadStereoRGB(const cv::Mat& imRectLeft, const cv::Mat& imRectRight, const double& timestamp)
+	Eigen::Matrix4d Tracker::LoadStereoRGB(const cv::Mat& imRectLeft,
+		const cv::Mat& imRectRight,
+		const double& timestamp)
 	{
 		m_imgGray = imRectLeft;
 		cv::Mat imGrayRight = imRectRight;
@@ -55,18 +64,22 @@ namespace my_slam
 			cv::cvtColor(m_imgGray, m_imgGray, cv::COLOR_BGR2GRAY);
 			cv::cvtColor(imGrayRight, imGrayRight, cv::COLOR_BGR2GRAY);
 		}
-		if(m_imgGray.channels() == 4)
+		if (m_imgGray.channels() == 4)
 		{
 			cv::cvtColor(m_imgGray, m_imgGray, cv::COLOR_BGRA2GRAY);
 			cv::cvtColor(imGrayRight, imGrayRight, cv::COLOR_BGRA2GRAY);
 		}
 
-		m_currentFrame = Frame(m_imgGray, imGrayRight, K, D, m_b, mp_ORBvocabulary);
+		mp_ORBextractorLeft = new ORBExtractor(mi_Features, mf_scaleFactor, mi_Levels, mi_iniThFAST, mi_minThFAST);
+		mp_ORBextractorRight = new ORBExtractor(mi_Features, mf_scaleFactor, mi_Levels, mi_iniThFAST, mi_minThFAST);
+
+		m_currentFrame =
+			Frame(m_imgGray, imGrayRight, K, D, m_b, mp_ORBextractorLeft, mp_ORBextractorRight, mp_ORBvocabulary);
 
 		Tracking();
 
 		spdlog::info("Tracker: The pose of {:d}th frame is", m_currentFrame.mi_FId);
-		std::cout<<m_currentFrame.m_Tcw<<std::endl;
+		std::cout << m_currentFrame.m_Tcw << std::endl;
 
 		return m_currentFrame.m_Tcw;
 	}
@@ -80,11 +93,11 @@ namespace my_slam
 
 		m_lastProcessedState = m_State;
 
-		if(m_State == e_TrackingState::NOT_INITIALIZED)
+		if (m_State == e_TrackingState::NOT_INITIALIZED)
 		{
 			StereoInitial();
 
-			if(m_State!=e_TrackingState::OK)
+			if (m_State != e_TrackingState::OK)
 				return;
 
 			mp_frameDraw->Update(this);
@@ -117,9 +130,6 @@ namespace my_slam
 
 		}
 
-
-
-
 	}
 
 	void Tracker::StereoInitial()
@@ -135,9 +145,9 @@ namespace my_slam
 
 			mp_map->AddKeyFrame(pKFini);
 
-			for(int i = 0; i < pKFini->N; i++)
+			for (int i = 0; i < pKFini->N; i++)
 			{
-				if(pKFini->mv_Depth[i] > 0)
+				if (pKFini->mv_Depth[i] > 0)
 				{
 					Eigen::Vector3d x3D = m_currentFrame.UnprojectStereo(i);
 
@@ -151,7 +161,7 @@ namespace my_slam
 
 					mp_map->AddMapPoint(pMapPoint);
 
-					m_currentFrame.mvp_mapPoints[i]= pMapPoint;
+					m_currentFrame.mvp_mapPoints[i] = pMapPoint;
 				}
 			}
 			spdlog::info("Tracker: StereoInitial: The Map is created with {0:d} points", mp_map->NumMapPointsinMap());
@@ -181,10 +191,10 @@ namespace my_slam
 		for (int i = 0; i < m_lastFrame.N; i++)
 		{
 			MapPoint* pmp = m_lastFrame.mvp_mapPoints[i];
-			if(pmp)
+			if (pmp)
 			{
 				MapPoint* pRep = pmp->GetReplaced();
-				if(pRep)
+				if (pRep)
 					m_lastFrame.mvp_mapPoints[i] = pRep;
 			}
 		}
@@ -201,9 +211,13 @@ namespace my_slam
 
 		int nmatches = matcher.SearchByBoW(mp_referenceKeyFrame, &m_currentFrame, vpMapPointsMatches);
 
-		if(nmatches<15)
+		if (nmatches < 15)
 		{
-			spdlog::warn("Tracker: TrackReferenceKeyFrame: Track {0:d}th frame by BoW fail, the reference KeyFrame is {1:d} (the Frame is {2:d})", m_currentFrame.mi_FId, mp_referenceKeyFrame->mi_KFId, mp_referenceKeyFrame->mi_FrameId);
+			spdlog::warn(
+				"Tracker: TrackReferenceKeyFrame: Track {0:d}th frame by BoW fail, the reference KeyFrame is {1:d} (the Frame is {2:d})",
+				m_currentFrame.mi_FId,
+				mp_referenceKeyFrame->mi_KFId,
+				mp_referenceKeyFrame->mi_FrameId);
 			return false;
 		}
 		m_currentFrame.mvp_mapPoints = vpMapPointsMatches;
@@ -212,12 +226,12 @@ namespace my_slam
 		VisionOptimizer::PoseOptimG2O(&m_currentFrame);
 
 		int nmatchesMap = 0;
-		for(int i =0; i<m_currentFrame.N; i++)
+		for (int i = 0; i < m_currentFrame.N; i++)
 		{
-			if(m_currentFrame.mvp_mapPoints[i])
+			if (m_currentFrame.mvp_mapPoints[i])
 			{
 				//如果对应的这个点为外点
-				if(m_currentFrame.mvb_Outlier[i])
+				if (m_currentFrame.mvb_Outlier[i])
 				{
 					//从当前帧把这个数据删除
 					MapPoint* pMP = m_currentFrame.mvp_mapPoints[i];
@@ -228,16 +242,16 @@ namespace my_slam
 					pMP->mi_lastFrameSeen = m_currentFrame.mi_FId;
 					nmatches--;
 				}
-				else if(m_currentFrame.mvp_mapPoints[i]->Observations()>0)
+				else if (m_currentFrame.mvp_mapPoints[i]->Observations() > 0)
 					nmatchesMap++;
 			}
 		}
 		// 跟踪成功的数目超过10才认为跟踪成功，否则跟踪失败
-		if(nmatches > 10)
+		if (nmatches > 10)
 			spdlog::info("Tracker: TrackReferenceKeyFrame: Track by KeyFrame success");
 		else
 			spdlog::warn("Tracker: TrackReferenceKeyFrame: Track by KeyFrame fail");
-		return nmatchesMap>=10;
+		return nmatchesMap >= 10;
 	}
 
 	void Tracker::UpdateLastFrame()
@@ -248,13 +262,15 @@ namespace my_slam
 	bool Tracker::TrackWithMotionModel()
 	{
 		spdlog::info("Tracker: TrackReferenceKeyFrame: Track by MotionModel");
-		ORBMatcher matcher(0.9,true);
+		ORBMatcher matcher(0.9, true);
 
 	}
+
 	bool Tracker::Relocalization()
 	{
 		return false;
 	}
+
 	void Tracker::SetLocalMap(LocalMap* plocalMap)
 	{
 		mp_localMap = plocalMap;

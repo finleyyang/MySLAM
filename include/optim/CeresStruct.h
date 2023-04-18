@@ -23,12 +23,15 @@ namespace my_slam
 	{
 	 public:
 		ReprojectionErrorPosOptim(Eigen::Vector3d p3s, cv::Point2f p2s, cv::Mat K)
-		:_p3s(p3s), _p2s(p2s), _K(K){}
+			: _p3s(p3s), _p2s(p2s), _K(K)
+		{
+		}
 
 		template<typename T>
 		bool operator()(const T* const cere_rot,
-						const T* const cere_tranf,
-						T* residual)const{
+			const T* const cere_tranf,
+			T* residual) const
+		{
 			T predictions[2];
 			T pp[3];
 			pp[0] = T(_p3s.x());
@@ -43,8 +46,8 @@ namespace my_slam
 			p[1] += cere_tranf[1];
 			p[2] += cere_tranf[2];
 
-			T xp = p[0]/p[2];
-			T yp = p[0]/p[2];
+			T xp = p[0] / p[2];
+			T yp = p[0] / p[2];
 
 			T up = xp * T(_K.at<float>(0, 0)) + T(_K.at<float>(0, 2));
 			T vp = yp * T(_K.at<float>(0, 0)) + T(_K.at<float>(1, 2));
@@ -52,8 +55,12 @@ namespace my_slam
 			predictions[1] = vp;
 		}
 
-		static ceres::CostFunction* Create(Eigen::Vector3d p3, cv::Point2f p2, cv::Mat K){
-			return (new ceres::AutoDiffCostFunction<ReprojectionErrorPosOptim, 2, 3, 3>(new ReprojectionErrorPosOptim(p3, p2, K)));
+		static ceres::CostFunction* Create(Eigen::Vector3d p3, cv::Point2f p2, cv::Mat K)
+		{
+			return (new ceres::AutoDiffCostFunction<ReprojectionErrorPosOptim,
+			                                        2,
+			                                        3,
+			                                        3>(new ReprojectionErrorPosOptim(p3, p2, K)));
 		}
 
 	 private:

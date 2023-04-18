@@ -8,10 +8,12 @@
 
 #include "vision/LocalMap.h"
 
-namespace my_slam{
+namespace my_slam
+{
 
-	LocalMap::LocalMap(Map* pmp):mp_Map(pmp), mb_AbortBA(false)
-	{};
+	LocalMap::LocalMap(Map* pmp) : mp_Map(pmp), mb_AbortBA(false)
+	{
+	};
 
 	LocalMap::~ LocalMap() = default;
 

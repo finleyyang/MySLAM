@@ -10,7 +10,9 @@
 
 namespace my_slam
 {
-	Map::Map() :mi_maxKFid(0){};
+	Map::Map() : mi_maxKFid(0)
+	{
+	};
 
 	//Map::~Map() = default;
 
@@ -48,7 +50,7 @@ namespace my_slam
 
 	std::vector<KeyFrame*> Map::GetAllKeyFrames()
 	{
-		return std::vector<KeyFrame*>(msp_keyFrames.begin(),msp_keyFrames.end());
+		return std::vector<KeyFrame*>(msp_keyFrames.begin(), msp_keyFrames.end());
 	}
 
 	std::vector<MapPoint*> Map::GetAllMapPoints()

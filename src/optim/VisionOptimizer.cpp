@@ -90,7 +90,6 @@ namespace my_slam
 		if (nInitialCorrespondences < 3)
 			return 0;
 
-
 		int nBad = 0;
 		for (size_t it = 0; it < 4; it++)
 		{

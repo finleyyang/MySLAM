@@ -17,13 +17,27 @@ namespace my_slam
 
 	Frame::~Frame() = default;
 
-	Frame::Frame(Frame const &F) : m_image(F.m_image), m_imageRight(F.m_imageRight)
+	Frame::Frame(Frame const& F) : m_image(F.m_image), m_imageRight(F.m_imageRight)
 	{
 
 	};
 
-	Frame::Frame(const cv::Mat& image_, const cv::Mat& imageright_, const cv::Mat& K_, const cv::Mat& D_, const float& b, ORBvocabulary* pvoc) : m_image(
-		image_.clone()), m_imageRight(imageright_.clone()), m_K(K_.clone()), m_D(D_.clone()), m_b(b), mp_ORBvocabulary(pvoc)
+	Frame::Frame(const cv::Mat& image_,
+		const cv::Mat& imageright_,
+		const cv::Mat& K_,
+		const cv::Mat& D_,
+		const float& b,
+		ORBExtractor* orbExtractorleft,
+		ORBExtractor* orbExtractorright,
+		ORBvocabulary* pvoc) : m_image(
+		image_.clone()),
+	                           m_imageRight(imageright_.clone()),
+	                           m_K(K_.clone()),
+	                           m_D(D_.clone()),
+	                           m_b(b),
+							   mp_ORBextractor(orbExtractorleft),
+							   mp_ORBextractorRight(orbExtractorright),
+	                           mp_ORBvocabulary(pvoc)
 	{
 		mi_FId = m_LastFId++;
 		spdlog::info("Frame: Process {0:d}th frame", mi_FId);
@@ -35,8 +49,8 @@ namespace my_slam
 		cx = m_K.at<float>(0, 2);
 		cy = m_K.at<float>(1, 2);
 
-		invfx = float(1.0)/fx;
-		invfy = float(1.0)/fy;
+		invfx = float(1.0) / fx;
+		invfy = float(1.0) / fy;
 
 		m_bf = m_b * ((fx + fy) / 2);
 
@@ -229,16 +243,16 @@ namespace my_slam
 	{
 		//计算该特征点的世界三维坐标
 		const float z = mv_Depth[i];
-		if(z>0)
+		if (z > 0)
 		{
 			const float u = mv_keypoints[i].pt.x;
 			const float v = mv_keypoints[i].pt.y;
-			const float x = (u-cx)*z*invfx;
-			const float y = (v-cy)*z*invfy;
+			const float x = (u - cx) * z * invfx;
+			const float y = (v - cy) * z * invfy;
 			Eigen::Vector3d x3Dc(x, y, z);
 
 			// Rwc * x3D + twc(m_Ow) 相机坐标转世界坐标
-			return m_Rwc*x3Dc+m_Ow;
+			return m_Rwc * x3Dc + m_Ow;
 		}
 		else
 			return Eigen::Vector3d();
@@ -247,10 +261,12 @@ namespace my_slam
 	cv::Point2f Frame::Reprojection(int i, Eigen::Matrix4d pose)
 	{
 		// Rcw * x3D + tcw  世界坐标转相机坐标
-		Eigen::Vector3d cameraPointPose = pose.block<3, 3>(0, 0) * mvp_mapPoints[i]->GetWorldPose() + pose.block<3, 1>(0, 3);
-		Eigen::Vector3d cameraPointPoseUn(cameraPointPose.x() / cameraPointPose.z(), cameraPointPose.y() / cameraPointPose.z(), 1);
+		Eigen::Vector3d
+			cameraPointPose = pose.block<3, 3>(0, 0) * mvp_mapPoints[i]->GetWorldPose() + pose.block<3, 1>(0, 3);
+		Eigen::Vector3d
+			cameraPointPoseUn(cameraPointPose.x() / cameraPointPose.z(), cameraPointPose.y() / cameraPointPose.z(), 1);
 		//相机坐标转图像坐标
-		return cv::Point2f (fx * cameraPointPoseUn.x() + cx, fy * cameraPointPoseUn.y() + cy);
+		return cv::Point2f(fx * cameraPointPoseUn.x() + cx, fy * cameraPointPoseUn.y() + cy);
 	}
 
 	void Frame::SetPose(Eigen::Matrix4d Tcw)
@@ -287,7 +303,7 @@ namespace my_slam
 
 	void Frame::ComputeBoW()
 	{
-		if(m_BowVec.empty())
+		if (m_BowVec.empty())
 		{
 			std::vector<cv::Mat> vCurrentDesc = Converter::toDescriptorVector(m_descriptors);
 
@@ -296,8 +312,8 @@ namespace my_slam
 	}
 	void Frame::showinfomation()
 	{
-		std::cout<<"mv_keypoints:size()" << mv_keypoints.size()<<std::endl;
-		std::cout<<"mv_keypointsRight:size()"<< mv_keypointsRight.size()<<std::endl;
-		std::cout<< "mvp_mapPoints.size()"<<mvp_mapPoints.size()<<std::endl;
+		std::cout << "mv_keypoints:size()" << mv_keypoints.size() << std::endl;
+		std::cout << "mv_keypointsRight:size()" << mv_keypointsRight.size() << std::endl;
+		std::cout << "mvp_mapPoints.size()" << mvp_mapPoints.size() << std::endl;
 	}
 }
