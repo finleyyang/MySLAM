@@ -6,6 +6,7 @@
 
 #include <opencv2/core/mat.hpp>
 #include <opencv2/core/types.hpp>
+#include <spdlog/spdlog.h>
 #include <utility>
 #include <vector>
 namespace my_slam
@@ -35,8 +36,8 @@ namespace my_slam
 	                           m_K(K_.clone()),
 	                           m_D(D_.clone()),
 	                           m_b(b),
-							   mp_ORBextractor(orbExtractorleft),
-							   mp_ORBextractorRight(orbExtractorright),
+	                           mp_ORBextractor(orbExtractorleft),
+	                           mp_ORBextractorRight(orbExtractorright),
 	                           mp_ORBvocabulary(pvoc)
 	{
 		mi_FId = m_LastFId++;
@@ -54,6 +55,14 @@ namespace my_slam
 
 		m_bf = m_b * ((fx + fy) / 2);
 
+		mi_scaleLevels = orbExtractorleft->GetLevels();
+		mf_scaleFactor = orbExtractorleft->GetScaleFactor();
+		mf_logScaleFactor = log(mf_scaleFactor);
+		mv_scaleFactors = orbExtractorleft->GetScaleFactors();
+		mv_invScaleFactors = orbExtractorleft->GetInverseScaleFactors();
+		mv_levelSigma2 = orbExtractorleft->GetScaleSigmaSquares();
+		mv_invLevelSigma2 = orbExtractorleft->GetInverseScaleSigmaSquares();
+
 		ExtractORB();
 		StereoMatch();
 
@@ -66,6 +75,7 @@ namespace my_slam
 		(*mp_ORBextractor)(m_image, mv_keypoints, m_descriptors);
 		(*mp_ORBextractorRight)(m_imageRight, mv_keypointsRight, m_descriptorsRight);
 		N = int(mv_keypoints.size());
+		spdlog::info("Frame: ExtractORB: there are {0:d} keypoints found", N);
 	}
 
 	void Frame::ShowORB() const
@@ -78,7 +88,7 @@ namespace my_slam
 			outimageRight,
 			cv::Scalar::all(-1),
 			cv::DrawMatchesFlags::DEFAULT);
-		cv::imshow("left", outimage);
+		cv::imshow("right", outimage);
 		cv::waitKey(0);
 	}
 
@@ -195,7 +205,6 @@ namespace my_slam
 					continue;
 
 				//亚像素插值
-
 				const float dist1 = v_Dists[L + v_bestincR - 1];
 				const float dist2 = v_Dists[L + v_bestincR];
 				const float dist3 = v_Dists[L + v_bestincR + 1];
@@ -251,7 +260,6 @@ namespace my_slam
 			const float y = (v - cy) * z * invfy;
 			Eigen::Vector3d x3Dc(x, y, z);
 
-			// Rwc * x3D + twc(m_Ow) 相机坐标转世界坐标
 			return m_Rwc * x3Dc + m_Ow;
 		}
 		else

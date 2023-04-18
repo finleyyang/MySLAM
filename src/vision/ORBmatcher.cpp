@@ -56,7 +56,7 @@ namespace my_slam
 
 		vector<int> rotHist[HISTO_LENGTH];
 		for (int i = 0; i < HISTO_LENGTH; i++)
-			rotHist[i].resize(500);
+			rotHist[i].reserve(500);
 
 		const float factor = HISTO_LENGTH / 360.0f;
 

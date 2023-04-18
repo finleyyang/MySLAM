@@ -64,8 +64,10 @@ namespace my_slam
 				g2o::EdgeStereoSE3ProjectXYZOnlyPose* e = new g2o::EdgeStereoSE3ProjectXYZOnlyPose();
 				e->setVertex(0, dynamic_cast<g2o::OptimizableGraph::Vertex*>(optimizer.vertex(0)));
 				e->setMeasurement(obs);
-				Eigen::Matrix3d Info = Eigen::Matrix3d::Identity();
+				const float invSigma2 = pF->mv_invLevelSigma2[kpUn.octave];
+				Eigen::Matrix3d Info = Eigen::Matrix3d::Identity()*invSigma2;
 				e->setInformation(Info);
+
 				g2o::RobustKernelHuber* rk = new g2o::RobustKernelHuber;
 				e->setRobustKernel(rk);
 				rk->setDelta(deltaStereo);

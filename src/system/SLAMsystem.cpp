@@ -46,12 +46,14 @@ namespace my_slam
 
 		mp_ORBvocabulary = new ORBvocabulary();
 
+		spdlog::debug("SLAMsystem: Load the ORB vocabulary");
 		bool bvocLoad = mp_ORBvocabulary->loadFromTextFile(strVocFile);
 		if (!bvocLoad)
 		{
 			spdlog::error("SLAMsystem: Falied to open the vocabulary");
 			exit(-1);
 		}
+		spdlog::debug("SLAMsystem: Load the ORB vocabulary finished");
 
 		mp_Map = new Map();
 

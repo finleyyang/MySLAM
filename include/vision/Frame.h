@@ -116,6 +116,14 @@ namespace my_slam
 		Eigen::Vector3d m_tcw;
 		Eigen::Matrix3d m_Rwc;
 		Eigen::Vector3d m_Ow;
+
+		int mi_scaleLevels;
+		float mf_scaleFactor;
+		float mf_logScaleFactor;
+		vector<float> mv_scaleFactors;
+		vector<float> mv_invScaleFactors;
+		vector<float> mv_levelSigma2;
+		vector<float> mv_invLevelSigma2;
 	};
 }
 
