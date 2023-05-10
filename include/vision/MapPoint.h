@@ -53,10 +53,12 @@ namespace my_slam
 
 		long unsigned int mi_lastFrameSeen;
 
+		std::map<KeyFrame*, size_t> m_observations;
+
 	 protected:
 		Eigen::Vector3d m_worldPose;
 
-		std::map<KeyFrame*, size_t> m_observations;  //哪个关键帧，中的第几个特征点
+
 
 		KeyFrame* mp_refKF;
 

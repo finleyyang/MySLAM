@@ -36,6 +36,8 @@ namespace my_slam
 
 	 public:
 
+		cv::Mat m_image, m_imageRight;
+
 		Map* mp_map;
 
 		std::vector<MapPoint*> mvp_mapPoints;

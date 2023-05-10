@@ -32,7 +32,6 @@ namespace my_slam
 			const T* const cere_tranf,
 			T* residual) const
 		{
-			T predictions[2];
 			T pp[3];
 			pp[0] = T(_p3s.x());
 			pp[1] = T(_p3s.y());
@@ -50,9 +49,11 @@ namespace my_slam
 			T yp = p[0] / p[2];
 
 			T up = xp * T(_K.at<float>(0, 0)) + T(_K.at<float>(0, 2));
-			T vp = yp * T(_K.at<float>(0, 0)) + T(_K.at<float>(1, 2));
-			predictions[0] = up;
-			predictions[1] = vp;
+			T vp = yp * T(_K.at<float>(1, 1)) + T(_K.at<float>(1, 2));
+
+			residual[0] = T(_p2s.x) - up;
+			residual[1] = T(_p2s.y) - vp;
+			return true;
 		}
 
 		static ceres::CostFunction* Create(Eigen::Vector3d p3, cv::Point2f p2, cv::Mat K)

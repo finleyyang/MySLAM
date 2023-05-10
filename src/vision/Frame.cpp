@@ -4,9 +4,12 @@
 #include "vision/Frame.h"
 #include "vision/MapPoint.h"
 
+#include <fstream>
 #include <opencv2/core/mat.hpp>
 #include <opencv2/core/types.hpp>
+#include <opencv2/highgui.hpp>
 #include <spdlog/spdlog.h>
+#include <string>
 #include <utility>
 #include <vector>
 namespace my_slam
@@ -42,8 +45,6 @@ namespace my_slam
 	{
 		mi_FId = m_LastFId++;
 		spdlog::info("Frame: Process {0:d}th frame", mi_FId);
-		m_cols = m_image.cols;
-		m_rows = m_image.rows;
 
 		fx = m_K.at<float>(0, 0);
 		fy = m_K.at<float>(1, 1);
@@ -88,24 +89,31 @@ namespace my_slam
 			outimageRight,
 			cv::Scalar::all(-1),
 			cv::DrawMatchesFlags::DEFAULT);
-		cv::imshow("right", outimage);
+		cv::imshow("left", outimage);
+		cv::imshow("right", outimageRight);
 		cv::waitKey(0);
 	}
 
 	void Frame::StereoMatch()
 	{
+
 		mv_uRight = std::vector<float>(N, -1.0f);
 		mv_Depth = std::vector<float>(N, -1.0f);
+		const int v_thOrbDist = (ORBMatcher::TH_HIGH + ORBMatcher::TH_LOW) / 2;
 		// 二维vector存储每一行的orb特征点的列坐标
 		// 第一个vector的序号存储的特征点的行坐标，第二个vector存储的是特征点的序号
-		std::vector<std::vector<size_t>> v_RowIndices(m_rows, std::vector<size_t>());
+		const int n_rows = mp_ORBextractor->mv_imagePyramid[0].rows;
+		std::vector<std::vector<size_t>> v_RowIndices(n_rows, std::vector<size_t>());
+		for(int i = 0; i< n_rows; i++)
+			v_RowIndices[i].reserve(200);
+
 		const int Nr = int(mv_keypointsRight.size());
 		for (size_t iR = 0; iR < Nr; iR++)
 		{
 			const cv::KeyPoint& kp = mv_keypointsRight[iR];
 			const float& kpY = kp.pt.y;
 
-			float r = 2.0;
+			float r = 2.f * mv_scaleFactors[mv_keypointsRight[iR].octave];
 			const int maxr = ceil(kpY + r);
 			const int minr = floor(kpY - r);
 
@@ -121,11 +129,11 @@ namespace my_slam
 		std::vector<std::pair<int, int> > v_DistIdx;
 		v_DistIdx.reserve(N);
 
-		const int v_thOrbDist = (ORBMatcher::TH_HIGH + ORBMatcher::TH_LOW) / 2;
 
 		for (size_t iL = 0; iL < N; iL++)
 		{
 			const cv::KeyPoint& kpl = mv_keypoints[iL];
+			const int &levelL = kpl.octave;
 			const float& vL = kpl.pt.y;
 			const float& uL = kpl.pt.x;
 
@@ -151,7 +159,10 @@ namespace my_slam
 				const cv::KeyPoint& kpR = mv_keypointsRight[iR];
 				const float& uR = kpR.pt.x;
 
-				if (uR < maxU && uR > minU)
+				if(kpR.octave<levelL-1 || kpR.octave>levelL+1)
+					continue;
+
+				if (uR <= maxU && uR >= minU)
 				{
 					const cv::Mat& dR = m_descriptorsRight.row(iR);
 					const int dist = ORBMatcher::CalculateDescriptorDistance(dL, dR);
@@ -163,13 +174,16 @@ namespace my_slam
 					}
 				}
 			}
-
 			//2.精匹配
 			if (v_bestDist < v_thOrbDist)
 			{
 				const float uR0 = mv_keypointsRight[v_bestIdxR].pt.x;
+				const float scaleFactor = mv_invScaleFactors[kpl.octave];
+				const float scaleduL = round(kpl.pt.x*scaleFactor);
+				const float scaledvL = round(kpl.pt.y*scaleFactor);
+				const float scaleduR0 = round(uR0*scaleFactor);
 				const int w = 5;
-				cv::Mat Il = m_image.rowRange(int(vL - w), int(vL + w + 1)).colRange(int(uL - w), int(uL + w + 1));
+				cv::Mat Il = mp_ORBextractor->mv_imagePyramid[kpl.octave].rowRange(scaledvL-w,scaledvL+w+1).colRange(scaleduL-w,scaleduL+w+1);
 				Il.convertTo(Il, CV_32F);
 				Il = Il - Il.at<float>(w, w) * cv::Mat::ones(Il.rows, Il.cols, CV_32F);
 				int v_bestBlockDist = INT_MAX;
@@ -182,13 +196,14 @@ namespace my_slam
 				const float iniu = uR0 - L - w;
 				const float endu = uR0 + L + w + 1;
 
-				if (iniu < 0 || endu >= float(m_imageRight.cols))
+				if (iniu<0 || endu >= mp_ORBextractorRight->mv_imagePyramid[kpl.octave].cols)
 					continue;
 
 				for (int incR = -L; incR <= +L; incR++)
 				{
-					cv::Mat Ir = m_imageRight.rowRange(int(vL - w), int(vL + w + 1)).colRange(int(uR0) + incR - w,
-						int(uR0) + incR + w + 1);
+					cv::Mat Ir = mp_ORBextractorRight->mv_imagePyramid[kpl.octave].rowRange(scaledvL-w,
+						scaledvL+w+1).colRange(scaleduR0+incR-w,scaleduR0+incR+w+1);
+
 					Ir.convertTo(Ir, CV_32F);
 					Ir = Ir - Ir.at<float>(w, w) * cv::Mat::ones(Ir.rows, Ir.cols, CV_32F);
 					auto dist = cv::norm(Il, Ir, cv::NORM_L1);
@@ -214,7 +229,7 @@ namespace my_slam
 				if (deltaR < -1 || deltaR > 1)
 					continue;
 
-				float bestuR = ((float)uR0 + (float)v_bestincR + deltaR);
+				float bestuR = mv_scaleFactors[kpl.octave]*((float)scaleduR0+(float)v_bestincR+deltaR);
 
 				float disparity = (uL - bestuR);
 
@@ -304,7 +319,7 @@ namespace my_slam
 				kpl = mv_keypoints[i];
 				kpr.pt.y = kpl.pt.y;
 				kpr.pt.x = mv_uRight[i];
-				std::cout << kpl.pt << " " << kpr.pt << std::endl;
+				std::cout << kpl.pt << " " << kpr.pt << " "<<mv_Depth[i]<<std::endl;
 			}
 		}
 	}

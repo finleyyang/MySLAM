@@ -28,7 +28,7 @@ find_package(OpenCV REQUIRED)
 find_package(Ceres REQUIRED)
 find_package(Pangolin REQUIRED)
 find_package(spdlog REQUIRED)
-
+find_package(GTest REQUIRED)
 
 include_directories(
         ${EIGEN3_INCLUDE_DIR}
@@ -36,6 +36,7 @@ include_directories(
         ${CERES_INCLUDE_DIRS}
         ${Pangolin_INCLUDE_DIRS}
         ${spdlog_INCLUDE_DIRS}
+        ${GTEST_INCLUDE_DIRS}
         ${PROJECT_SOURCE_DIR}/Thirdparty/DBoW2
         ${PROJECT_SOURCE_DIR}/Thirdparty/g2o
 )
@@ -46,7 +47,7 @@ target_link_libraries(${MySLAM_LIBNAME}
         ${CERES_LIBRARIES}
         ${Pangolin_LIBS}
         ${spdlog_LIBS}
-
+        ${GTEST_BOTH_LIBRARIES}
         ${PROJECT_SOURCE_DIR}/Thirdparty/DBoW2/lib/libDBoW2.so
         ${PROJECT_SOURCE_DIR}/Thirdparty/g2o/lib/libg2o.so
         )

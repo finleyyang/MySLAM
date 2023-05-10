@@ -149,6 +149,8 @@ namespace my_slam
 			{
 				if (pKFini->mv_Depth[i] > 0)
 				{
+
+
 					Eigen::Vector3d x3D = m_currentFrame.UnprojectStereo(i);
 
 					MapPoint* pMapPoint = new MapPoint(x3D, pKFini, mp_map);
@@ -223,7 +225,9 @@ namespace my_slam
 		m_currentFrame.mvp_mapPoints = vpMapPointsMatches;
 		m_currentFrame.SetPose(m_lastFrame.m_Tcw);
 
-		VisionOptimizer::PoseOptimG2O(&m_currentFrame);
+		//VisionOptimizer::PoseOptimCeres(&m_currentFrame);
+		//VisionOptimizer::PoseOptimG2O(&m_currentFrame);
+		VisionOptimizer::PoseOpenCV(&m_currentFrame);
 
 		int nmatchesMap = 0;
 		for (int i = 0; i < m_currentFrame.N; i++)

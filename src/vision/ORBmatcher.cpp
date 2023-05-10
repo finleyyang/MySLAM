@@ -9,6 +9,8 @@
 #include "DBoW2/FeatureVector.h"
 #include "vision/MapPoint.h"
 #include <opencv2/core/types.hpp>
+#include <opencv2/highgui.hpp>
+#include <opencv2/imgproc.hpp>
 #include <vector>
 
 namespace my_slam
@@ -168,6 +170,30 @@ namespace my_slam
 				}
 			}
 		}
+#if 0
+		cv::Mat Fimage;
+		cv::cvtColor(F->m_image, Fimage, cv::COLOR_GRAY2RGB);
+		cv::Mat PFimage;
+		cv::cvtColor(pKF->m_image, PFimage, cv::COLOR_GRAY2RGB);
+		for (int i = 0; i < vpMapPointMatches.size(); i++)
+		{
+			if (vpMapPointMatches[i] != NULL)
+			{
+				std::cout << vpMapPointMatches[i]->m_observations[pKF] << std::endl;
+				std::cout<<F->mv_keypoints[i].pt<<std::endl;
+				std::cout<<pKF->mv_keypoints[vpMapPointMatches[i]->m_observations[pKF]].pt<<std::endl;
+				cv::circle(Fimage, F->mv_keypoints[i].pt, 5, { 255, 255, 0 }, 1);
+				cv::circle(PFimage,
+					pKF->mv_keypoints[vpMapPointMatches[i]->m_observations[pKF]].pt,
+					5,
+					{ 255, 255, 0 },
+					1);
+				cv::imshow("F", Fimage);
+				cv::imshow("PF", PFimage);
+				cv::waitKey(0);
+			}
+		}
+#endif
 		return nmatches;
 	}
 

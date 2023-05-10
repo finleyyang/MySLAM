@@ -16,7 +16,9 @@ namespace my_slam
 	KeyFrame::~KeyFrame() = default;
 
 	KeyFrame::KeyFrame(Frame& F, Map* p_map)
-		: mv_Depth(F.mv_Depth),
+		: m_image(F.m_image),
+		  m_imageRight(F.m_imageRight),
+		  mv_Depth(F.mv_Depth),
 		  mv_keypoints(F.mv_keypoints),
 		  mv_keypointsRight(F.mv_keypointsRight),
 		  mv_uRight(F.mv_uRight),

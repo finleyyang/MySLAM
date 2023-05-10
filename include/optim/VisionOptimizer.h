@@ -30,10 +30,13 @@ namespace my_slam
 		//只优化当前帧的位姿
 		static int PoseOptimG2O(Frame* pF);
 
+		static int PoseOpenCV(Frame* pF);
+
 		static int PoseOptimCeres(Frame* pF);
 
 	 public:
 		constexpr static float chi2Stereo[4] = { 7.815, 7.815, 7.815, 7.815 };
+		constexpr static float chi2Mono[4]={5.991,5.991,5.991,5.991};
 		constexpr static int its[4] = { 10, 10, 10, 10 };
 	};
 }

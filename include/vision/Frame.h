@@ -68,8 +68,6 @@ namespace my_slam
 	 public:
 		cv::Mat m_image, m_imageRight;
 
-		int m_rows{}, m_cols{};
-
 		int N{};
 
 		ORBvocabulary* mp_ORBvocabulary;
@@ -91,7 +89,7 @@ namespace my_slam
 		float m_b;
 		//z = bf / d;
 		//m_bf = baseline * length_focal
-		float m_bf{ 386.1448 };
+		float m_bf;
 
 		cv::Mat m_K;
 		cv::Mat m_D;
