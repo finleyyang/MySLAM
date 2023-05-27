@@ -13,6 +13,7 @@
 #include "vision/MapPoint.h"
 #include "vision/ORBmatcher.h"
 
+#include <algorithm>
 #include <opencv2/imgproc.hpp>
 #include <spdlog/spdlog.h>
 
@@ -49,6 +50,8 @@ namespace my_slam
 		mi_iniThFAST = fSettings["ORBextractor.iniThFAST"];
 		mi_minThFAST = fSettings["ORBextractor.minThFAST"];
 
+		mf_ThDepth = fSettings["ThDepth"];
+
 		m_b = 2 * m_bf / (fx + fy);
 	}
 
@@ -74,7 +77,7 @@ namespace my_slam
 		mp_ORBextractorRight = new ORBExtractor(mi_Features, mf_scaleFactor, mi_Levels, mi_iniThFAST, mi_minThFAST);
 
 		m_currentFrame =
-			Frame(m_imgGray, imGrayRight, K, D, m_b, mp_ORBextractorLeft, mp_ORBextractorRight, mp_ORBvocabulary);
+			Frame(m_imgGray, imGrayRight, K, D, m_b, mp_ORBextractorLeft, mp_ORBextractorRight, mp_ORBvocabulary, mf_ThDepth);
 
 		Tracking();
 
@@ -149,7 +152,6 @@ namespace my_slam
 			{
 				if (pKFini->mv_Depth[i] > 0)
 				{
-
 
 					Eigen::Vector3d x3D = m_currentFrame.UnprojectStereo(i);
 
@@ -260,18 +262,114 @@ namespace my_slam
 
 	void Tracker::UpdateLastFrame()
 	{
+		KeyFrame* pRef = m_lastFrame.mp_referenceKeyFrame;
 		m_currentFrame.SetPose(m_Velocity * m_lastFrame.m_Tcw);
+
+		if (mi_LastKeyFrameId == m_lastFrame.mi_FId)
+			return;
+
+		vector<pair<float, int> > vDepthIdx;
+		vDepthIdx.reserve(m_lastFrame.N);
+
+		for (int i = 0; i < m_lastFrame.N; i++)
+		{
+			float z = m_lastFrame.mv_Depth[i];
+			if (z > 0)
+			{
+				vDepthIdx.push_back(make_pair(z, i));
+			}
+		}
+		if (vDepthIdx.empty())
+			return;
+
+		sort(vDepthIdx.begin(), vDepthIdx.end());
+
+		int nPoints = 0;
+		for(size_t j=0; j<vDepthIdx.size(); j++) {
+		    int i = vDepthIdx[j].second;
+			bool bCreateNew = false;
+
+			MapPoint* pMP = m_lastFrame.mvp_mapPoints[i];
+			if(!pMP)
+				bCreateNew = true;
+			else if(pMP->Observations()<1)
+				bCreateNew = true;
+
+			if(bCreateNew)
+			{
+				Eigen::Vector3d x3D = m_lastFrame.UnprojectStereo(i);
+				MapPoint* pNewMP = new MapPoint(x3D,mp_map,&m_lastFrame,i);
+
+				m_lastFrame.mvp_mapPoints[i]=pNewMP;
+				mlp_temporalPoints.push_back(pNewMP);
+				nPoints++;
+			}
+			else
+			{
+				nPoints++;
+			}
+
+			if(vDepthIdx[j].first>mf_ThDepth && nPoints>100)
+				break;
+		}
 	}
 
 	bool Tracker::TrackWithMotionModel()
 	{
-		spdlog::info("Tracker: TrackReferenceKeyFrame: Track by MotionModel");
+		spdlog::info("Tracker: TrackWithMotionModel: Track by MotionModel");
 		ORBMatcher matcher(0.9, true);
+		UpdateLastFrame();
+		m_currentFrame.SetPose(m_Velocity*m_lastFrame.m_Tcw);
+		fill(m_currentFrame.mvp_mapPoints.begin(), m_currentFrame.mvp_mapPoints.end(), static_cast<MapPoint*>(NULL));
 
+		int th = 15;
+		int nmatches = matcher.SearchByProjection(m_currentFrame,m_lastFrame,th);
+		if(nmatches<20)
+		{
+			fill(m_currentFrame.mvp_mapPoints.begin(),m_currentFrame.mvp_mapPoints.end(),static_cast<MapPoint*>(NULL));
+			nmatches = matcher.SearchByProjection(m_currentFrame,m_lastFrame,2*th);
+		}
+
+		if(nmatches<20)
+			return false;
+
+		VisionOptimizer::PoseOpenCV(&m_currentFrame);
+
+		int nmatchesMap = 0;
+		for (int i = 0; i < m_currentFrame.N; i++)
+		{
+			if (m_currentFrame.mvp_mapPoints[i])
+			{
+				//如果对应的这个点为外点
+				if (m_currentFrame.mvb_Outlier[i])
+				{
+					//从当前帧把这个数据删除
+					MapPoint* pMP = m_currentFrame.mvp_mapPoints[i];
+
+					m_currentFrame.mvp_mapPoints[i] = static_cast<MapPoint*>(NULL);
+					m_currentFrame.mvb_Outlier[i] = false;
+					pMP->mb_trackInView = false;
+					pMP->mi_lastFrameSeen = m_currentFrame.mi_FId;
+					nmatches--;
+				}
+				else if (m_currentFrame.mvp_mapPoints[i]->Observations() > 0)
+					nmatchesMap++;
+			}
+		}
+		// 跟踪成功的数目超过10才认为跟踪成功，否则跟踪失败
+		if (nmatches > 10)
+			spdlog::info("Tracker: TrackWithMotionModel: Track by Motion Model success");
+		else
+			spdlog::warn("Tracker: TrackWithMotionModel: Track by Motion Model fail");
+		return nmatchesMap >= 10;
 	}
 
 	bool Tracker::Relocalization()
 	{
+		spdlog::info("Tracker: Relocalization: Relocal");
+		m_currentFrame.ComputeBoW();
+
+		vector<KeyFrame*> vpCandidateKFs = mp_KeyFrameDB->DetectRelocalizationCandidates(&mCurrentFrame);
 		return false;
 	}
 

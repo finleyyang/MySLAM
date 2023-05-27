@@ -35,6 +35,8 @@ namespace my_slam
 
 		int SearchByBoW(KeyFrame* pKF1, KeyFrame* pKF2, std::vector<MapPoint*>& vpMatches12);
 
+		int SearchByProjection(Frame &CurrentFrame, const Frame &LastFrame, const float th);
+
 	 public:
 		static const int TH_LOW;
 		static const int TH_HIGH;

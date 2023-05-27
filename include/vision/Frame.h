@@ -22,6 +22,8 @@
 
 namespace my_slam
 {
+#define FRAME_GRID_ROWS 48
+#define FRAME_GRID_COLS 64
 
 	class MapPoint;
 	class KeyFrame;
@@ -42,7 +44,7 @@ namespace my_slam
 			const float& b,
 			ORBExtractor* orbExtractorleft,
 			ORBExtractor* orbExtractorright,
-			ORBvocabulary* pvoc);
+			ORBvocabulary* pvoc, const float& ThDepth);
 
 		void ExtractORB();
 
@@ -64,6 +66,12 @@ namespace my_slam
 		void showstereomatch();
 
 		void showinfomation();
+
+		void AssignFeaturesToGrid();
+
+		bool PosInGrid(const cv::KeyPoint &kp, int &posX, int &posY);
+
+		vector<size_t> GetFeaturesInArea(const float &x, const float  &y, const float  &r, const int minLevel=-1, const int maxLevel=-1) const;
 
 	 public:
 		cv::Mat m_image, m_imageRight;
@@ -99,6 +107,9 @@ namespace my_slam
 		//*cw,世界坐标转相机坐标
 		Eigen::Matrix4d m_Tcw;
 
+		float mf_ThDepth;
+
+
 		long unsigned int mi_FId;
 		static long unsigned int m_LastFId;
 
@@ -110,10 +121,15 @@ namespace my_slam
 		//内部实际储存std::map<NodeId, std::vector<unsigned int>>
 		DBoW2::FeatureVector m_FeatVec;
 
+		std::vector<std::size_t> m_Grid[FRAME_GRID_COLS][FRAME_GRID_ROWS];
+
 		Eigen::Matrix3d m_Rcw;
 		Eigen::Vector3d m_tcw;
 		Eigen::Matrix3d m_Rwc;
 		Eigen::Vector3d m_Ow;
+
+		static float mf_gridElementWidthInv;
+		static float mf_gridElementHeightInv;
 
 		int mi_scaleLevels;
 		float mf_scaleFactor;

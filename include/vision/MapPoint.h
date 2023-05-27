@@ -17,6 +17,7 @@ namespace my_slam
 {
 	class KeyFrame;
 	class Map;
+	class Frame;
 
 	class MapPoint
 	{
@@ -25,7 +26,8 @@ namespace my_slam
 
 		~MapPoint();
 
-		MapPoint(Eigen::Vector3d& Pos, KeyFrame* pRefKF, Map* pMap);
+		MapPoint(const Eigen::Vector3d& Pos, KeyFrame* pRefKF, Map* pMap);
+		MapPoint(const Eigen::Vector3d& Pos,  Map* pMap, Frame* pFrame , const int &idxF);
 
 		void AddObservation(KeyFrame* pKF, size_t idx);
 
@@ -36,6 +38,8 @@ namespace my_slam
 		MapPoint* GetReplaced();
 
 		bool isBad();
+
+		cv::Mat GetDescriptor();
 
 		Eigen::Vector3d GetWorldPose();
 
@@ -58,7 +62,10 @@ namespace my_slam
 	 protected:
 		Eigen::Vector3d m_worldPose;
 
-
+		long unsigned int mi_Id;
+		static long unsigned int mi_lastId;
+		long int mi_firstKFid;
+		long int mi_firstFrame;
 
 		KeyFrame* mp_refKF;
 

@@ -78,6 +78,7 @@ namespace my_slam
 		float m_bf;
 
 		ORBvocabulary* mp_ORBvocabulary;
+		KeyFrameDatabase* mpKeyFrameDB;
 
 		Map* mp_map;
 
@@ -109,12 +110,14 @@ namespace my_slam
 
 		Eigen::Matrix4d m_Velocity;
 
+		float mf_ThDepth;
 		int mi_Features;
 		float mf_scaleFactor;
 		int mi_Levels;
 		int mi_iniThFAST;
 		int mi_minThFAST;
 
+		list<MapPoint*> mlp_temporalPoints;
 	};
 }
 

@@ -12,13 +12,20 @@
 #include <utility>
 namespace my_slam
 {
+	long unsigned int MapPoint::mi_lastId = 0;
 
 	MapPoint::MapPoint() = default;
 
 	MapPoint::~MapPoint() = default;
 
-	MapPoint::MapPoint(Eigen::Vector3d& Pos, KeyFrame* pRefKF, Map* pMap)
+	MapPoint::MapPoint(const Eigen::Vector3d& Pos, KeyFrame* pRefKF, Map* pMap)
 		: m_worldPose(std::move(Pos)), mp_refKF(pRefKF), mp_map(pMap)
+	{
+		mi_Id = mi_lastId++;
+	}
+
+	MapPoint::MapPoint(const Eigen::Vector3d& Pos,  Map* pMap, Frame* pFrame , const int &idxF)
+		: m_worldPose(std::move(Pos)), mp_map(pMap)
 	{
 
 	}
@@ -92,10 +99,17 @@ namespace my_slam
 	{
 		return mp_Replaced;
 	}
+
 	bool MapPoint::isBad()
 	{
 		return mb_Bad;
 	}
+
+	cv::Mat MapPoint::GetDescriptor()
+	{
+		return m_descriptor;
+	}
+
 	Eigen::Vector3d MapPoint::GetWorldPose()
 	{
 		return m_worldPose;

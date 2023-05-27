@@ -4,6 +4,7 @@
 #include "vision/Frame.h"
 #include "vision/MapPoint.h"
 
+#include <algorithm>
 #include <fstream>
 #include <opencv2/core/mat.hpp>
 #include <opencv2/core/types.hpp>
@@ -33,15 +34,15 @@ namespace my_slam
 		const float& b,
 		ORBExtractor* orbExtractorleft,
 		ORBExtractor* orbExtractorright,
-		ORBvocabulary* pvoc) : m_image(
-		image_.clone()),
-	                           m_imageRight(imageright_.clone()),
-	                           m_K(K_.clone()),
-	                           m_D(D_.clone()),
-	                           m_b(b),
-	                           mp_ORBextractor(orbExtractorleft),
-	                           mp_ORBextractorRight(orbExtractorright),
-	                           mp_ORBvocabulary(pvoc)
+		ORBvocabulary* pvoc, const float& ThDepth) : m_image(image_.clone()),
+	                                                 m_imageRight(imageright_.clone()),
+	                                                 m_K(K_.clone()),
+	                                                 m_D(D_.clone()),
+	                                                 m_b(b),
+	                                                 mp_ORBextractor(orbExtractorleft),
+	                                                 mp_ORBextractorRight(orbExtractorright),
+	                                                 mp_ORBvocabulary(pvoc),
+	                                                 mf_ThDepth(ThDepth)
 	{
 		mi_FId = m_LastFId++;
 		spdlog::info("Frame: Process {0:d}th frame", mi_FId);
@@ -65,10 +66,47 @@ namespace my_slam
 		mv_invLevelSigma2 = orbExtractorleft->GetInverseScaleSigmaSquares();
 
 		ExtractORB();
+
+		mf_gridElementWidthInv = static_cast<float>(FRAME_GRID_COLS) / static_cast<float>(m_image.cols);
+		mf_gridElementHeightInv = static_cast<float>(FRAME_GRID_ROWS) / static_cast<float>(m_image.rows);
+
 		StereoMatch();
 
 		mvp_mapPoints = std::vector<MapPoint*>(N, static_cast<MapPoint*>(nullptr));
 		mvb_Outlier = std::vector<bool>(N, false);
+
+		AssignFeaturesToGrid();
+	}
+
+	void Frame::AssignFeaturesToGrid()
+	{
+		int nReserve = 0.5f*N/(FRAME_GRID_COLS*FRAME_GRID_ROWS);
+		for(unsigned int i=0; i<FRAME_GRID_COLS;i++)
+			for (unsigned int j=0; j<FRAME_GRID_ROWS;j++)
+				m_Grid[i][j].reserve(nReserve);
+		for(int i=0;i<N;i++)
+		{
+			const cv::KeyPoint &kp = mv_keypoints[i];
+
+			//存储某个特征点所在网格的网格坐标，nGridPosX范围：[0,FRAME_GRID_COLS], nGridPosY范围：[0,FRAME_GRID_ROWS]
+			int nGridPosX, nGridPosY;
+			// 计算某个特征点所在网格的网格坐标，如果找到特征点所在的网格坐标，记录在nGridPosX,nGridPosY里，返回true，没找到返回false
+			if(PosInGrid(kp,nGridPosX,nGridPosY))
+				//记录每个网格中的特征点的数量
+				m_Grid[nGridPosX][nGridPosY].push_back(i);
+		}
+	}
+
+	bool Frame::PosInGrid(const cv::KeyPoint &kp, int &posX, int &posY)
+	{
+
+		posX = round(kp.pt.x*mf_gridElementWidthInv);
+		posY = round(kp.pt.y*mf_gridElementHeightInv);
+
+		if(posX<0 || posX>=FRAME_GRID_COLS || posY<0 || posY>=FRAME_GRID_ROWS)
+			return false;
+
+		return true;
 	}
 
 	void Frame::ExtractORB()
@@ -104,7 +142,7 @@ namespace my_slam
 		// 第一个vector的序号存储的特征点的行坐标，第二个vector存储的是特征点的序号
 		const int n_rows = mp_ORBextractor->mv_imagePyramid[0].rows;
 		std::vector<std::vector<size_t>> v_RowIndices(n_rows, std::vector<size_t>());
-		for(int i = 0; i< n_rows; i++)
+		for (int i = 0; i < n_rows; i++)
 			v_RowIndices[i].reserve(200);
 
 		const int Nr = int(mv_keypointsRight.size());
@@ -129,11 +167,10 @@ namespace my_slam
 		std::vector<std::pair<int, int> > v_DistIdx;
 		v_DistIdx.reserve(N);
 
-
 		for (size_t iL = 0; iL < N; iL++)
 		{
 			const cv::KeyPoint& kpl = mv_keypoints[iL];
-			const int &levelL = kpl.octave;
+			const int& levelL = kpl.octave;
 			const float& vL = kpl.pt.y;
 			const float& uL = kpl.pt.x;
 
@@ -159,7 +196,7 @@ namespace my_slam
 				const cv::KeyPoint& kpR = mv_keypointsRight[iR];
 				const float& uR = kpR.pt.x;
 
-				if(kpR.octave<levelL-1 || kpR.octave>levelL+1)
+				if (kpR.octave < levelL - 1 || kpR.octave > levelL + 1)
 					continue;
 
 				if (uR <= maxU && uR >= minU)
@@ -179,11 +216,14 @@ namespace my_slam
 			{
 				const float uR0 = mv_keypointsRight[v_bestIdxR].pt.x;
 				const float scaleFactor = mv_invScaleFactors[kpl.octave];
-				const float scaleduL = round(kpl.pt.x*scaleFactor);
-				const float scaledvL = round(kpl.pt.y*scaleFactor);
-				const float scaleduR0 = round(uR0*scaleFactor);
+				const float scaleduL = round(kpl.pt.x * scaleFactor);
+				const float scaledvL = round(kpl.pt.y * scaleFactor);
+				const float scaleduR0 = round(uR0 * scaleFactor);
 				const int w = 5;
-				cv::Mat Il = mp_ORBextractor->mv_imagePyramid[kpl.octave].rowRange(scaledvL-w,scaledvL+w+1).colRange(scaleduL-w,scaleduL+w+1);
+				cv::Mat Il =
+					mp_ORBextractor->mv_imagePyramid[kpl.octave].rowRange(scaledvL - w, scaledvL + w + 1).colRange(
+						scaleduL - w,
+						scaleduL + w + 1);
 				Il.convertTo(Il, CV_32F);
 				Il = Il - Il.at<float>(w, w) * cv::Mat::ones(Il.rows, Il.cols, CV_32F);
 				int v_bestBlockDist = INT_MAX;
@@ -196,13 +236,13 @@ namespace my_slam
 				const float iniu = uR0 - L - w;
 				const float endu = uR0 + L + w + 1;
 
-				if (iniu<0 || endu >= mp_ORBextractorRight->mv_imagePyramid[kpl.octave].cols)
+				if (iniu < 0 || endu >= mp_ORBextractorRight->mv_imagePyramid[kpl.octave].cols)
 					continue;
 
 				for (int incR = -L; incR <= +L; incR++)
 				{
-					cv::Mat Ir = mp_ORBextractorRight->mv_imagePyramid[kpl.octave].rowRange(scaledvL-w,
-						scaledvL+w+1).colRange(scaleduR0+incR-w,scaleduR0+incR+w+1);
+					cv::Mat Ir = mp_ORBextractorRight->mv_imagePyramid[kpl.octave].rowRange(scaledvL - w,
+						scaledvL + w + 1).colRange(scaleduR0 + incR - w, scaleduR0 + incR + w + 1);
 
 					Ir.convertTo(Ir, CV_32F);
 					Ir = Ir - Ir.at<float>(w, w) * cv::Mat::ones(Ir.rows, Ir.cols, CV_32F);
@@ -229,7 +269,7 @@ namespace my_slam
 				if (deltaR < -1 || deltaR > 1)
 					continue;
 
-				float bestuR = mv_scaleFactors[kpl.octave]*((float)scaleduR0+(float)v_bestincR+deltaR);
+				float bestuR = mv_scaleFactors[kpl.octave] * ((float)scaleduR0 + (float)v_bestincR + deltaR);
 
 				float disparity = (uL - bestuR);
 
@@ -319,7 +359,7 @@ namespace my_slam
 				kpl = mv_keypoints[i];
 				kpr.pt.y = kpl.pt.y;
 				kpr.pt.x = mv_uRight[i];
-				std::cout << kpl.pt << " " << kpr.pt << " "<<mv_Depth[i]<<std::endl;
+				std::cout << kpl.pt << " " << kpr.pt << " " << mv_Depth[i] << std::endl;
 			}
 		}
 	}
@@ -338,5 +378,63 @@ namespace my_slam
 		std::cout << "mv_keypoints:size()" << mv_keypoints.size() << std::endl;
 		std::cout << "mv_keypointsRight:size()" << mv_keypointsRight.size() << std::endl;
 		std::cout << "mvp_mapPoints.size()" << mvp_mapPoints.size() << std::endl;
+	}
+
+	vector<size_t> Frame::GetFeaturesInArea(const float& x,
+		const float& y,
+		const float& r,
+		const int minLevel,
+		const int maxLevel) const
+	{
+		vector<size_t> vIndices;
+		vIndices.reserve(N);
+
+		const int nMinCellX = max(0, (int)floor((x - r) * mf_gridElementWidthInv));
+		if (nMinCellX >= FRAME_GRID_COLS)
+			return vIndices;
+
+		const int nMaxCellX = min((int)FRAME_GRID_COLS - 1, (int)ceil((x + r) * mf_gridElementWidthInv));
+		if (nMaxCellX < 0)
+			return vIndices;
+
+		const int nMinCellY = max(0, (int)floor((y - r) * mf_gridElementHeightInv));
+		if (nMinCellY >= FRAME_GRID_ROWS)
+			return vIndices;
+
+		const int nMaxCellY = min((int)FRAME_GRID_ROWS - 1, (int)ceil((y + r) * mf_gridElementHeightInv));
+		if(nMaxCellY < 0)
+			return vIndices;
+
+		const bool bCheckLevels = (minLevel>0) || (maxLevel>=0);
+
+		for(int ix = nMinCellX; ix <= nMinCellX; ix++)
+		{
+			for(int iy = nMinCellY; iy <= nMaxCellY; iy++)
+			{
+				const vector<size_t> vCell = m_Grid[ix][iy];
+				if(vCell.empty())
+					continue;
+
+				for(size_t j=0, jend=vCell.size(); j<jend; j++)
+				{
+					const cv::KeyPoint &kp = mv_keypoints[vCell[j]];
+					if(bCheckLevels)
+					{
+						if(kp.octave<minLevel)
+							continue;
+						if(maxLevel>=0)
+							if(kp.octave>maxLevel)
+								continue;
+					}
+
+					const float distx = kp.pt.x-x;
+					const float disty = kp.pt.y-y;
+
+					if(fabs(distx)<r && fabs(disty)<r)
+						vIndices.push_back(vCell[j]);
+				}
+			}
+		}
+		return vIndices;
 	}
 }

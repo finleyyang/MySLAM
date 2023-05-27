@@ -8,6 +8,7 @@
 #include "vision/ORBmatcher.h"
 #include "DBoW2/FeatureVector.h"
 #include "vision/MapPoint.h"
+#include <Eigen/src/Core/Matrix.h>
 #include <opencv2/core/types.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
@@ -243,5 +244,143 @@ namespace my_slam
 		{
 			ind3 = -1;
 		}
+	}
+
+	int ORBMatcher::SearchByProjection(Frame& CurrentFrame, const Frame& LastFrame, const float th)
+	{
+		int nmatches = 0;
+		vector<int> rotHist[HISTO_LENGTH];
+		for(int i=0;i<HISTO_LENGTH;i++)
+			rotHist[i].reserve(500);
+
+		const float factor = HISTO_LENGTH/360.0f;
+
+		const Eigen::Matrix3d Rcw = CurrentFrame.m_Tcw.block<3, 3>(0, 0);
+		const Eigen::Vector3d tcw = CurrentFrame.m_Tcw.block<3, 1>(0, 3);
+
+		const Eigen::Vector3d twc = -Rcw.transpose()*tcw;
+
+		const Eigen::Matrix3d Rlw = LastFrame.m_Tcw.block<3, 3>(0, 0);
+		const Eigen::Vector3d tlw = LastFrame.m_Tcw.block<3, 1>(0, 3);
+
+		const Eigen::Vector3d tlc = Rlw*twc+tlw;
+
+		const bool bForward = tlc[2] > CurrentFrame.m_b;
+		const bool bBackward = -tlc[2] > CurrentFrame.m_b;
+
+		for(int i = 0; i < LastFrame.N; i++)
+		{
+			MapPoint *pmp = LastFrame.mvp_mapPoints[i];
+			if(pmp)
+			{
+				if(!LastFrame.mvb_Outlier[i])
+				{
+					Eigen::Vector3d x3Dw = pmp -> GetWorldPose();
+					Eigen::Vector3d x3Dc = Rcw*x3Dw+tcw;
+
+					const float xc = x3Dc[0];
+					const float yc = x3Dc[1];
+					const float invzc = 1.0 / x3Dc[2];
+
+					if(invzc < 0)
+						continue;
+
+					float u = CurrentFrame.fx * xc * invzc + CurrentFrame.cx;
+					float v = CurrentFrame.fx * yc * invzc + CurrentFrame.cy;
+
+					if(u<0 || u>CurrentFrame.m_image.cols)
+						continue;
+					if(v<0 || v>CurrentFrame.m_image.rows)
+						continue;
+
+					int nLastOctave = LastFrame.mv_keypoints[i].octave;
+
+					float radius = th*CurrentFrame.mv_scaleFactors[nLastOctave];
+
+					vector<size_t> vIndices2;
+
+					if(bForward)
+						vIndices2 = CurrentFrame.GetFeaturesInArea(u,v, radius, nLastOctave);
+					else if(bBackward)
+						vIndices2 = CurrentFrame.GetFeaturesInArea(u,v, radius, 0, nLastOctave);
+					else
+						vIndices2 = CurrentFrame.GetFeaturesInArea(u,v, radius, nLastOctave-1, nLastOctave+1);
+
+					if(vIndices2.empty())
+						continue;
+
+					const cv::Mat dMP = pmp->GetDescriptor();
+
+					int bestDist = 256;
+					int bestIdx2 = -1;
+
+					for(vector<size_t>::const_iterator vit=vIndices2.begin(), vend=vIndices2.end(); vit!=vend; vit++)
+					{
+						const size_t i2 = *vit;
+						if(CurrentFrame.mvp_mapPoints[i2])
+							if(CurrentFrame.mvp_mapPoints[i2]->Observations()>0)
+								continue;
+
+						if(CurrentFrame.mv_uRight[i2]>0)
+						{
+							const float ur = u - CurrentFrame.m_bf*invzc;
+							const float er = fabs(ur - CurrentFrame.mv_uRight[i2]);
+							if(er>radius)
+								continue;
+						}
+
+						const cv::Mat &d = CurrentFrame.m_descriptors.row(i2);
+
+						const int dist = CalculateDescriptorDistance(dMP,d);
+
+						if(dist<bestDist)
+						{
+							bestDist=dist;
+							bestIdx2=i2;
+						}
+					}
+
+					if(bestDist<=TH_HIGH)
+					{
+						CurrentFrame.mvp_mapPoints[bestIdx2]=pmp;
+						nmatches++;
+						// 计算匹配点旋转角度差所在的直方图
+						if(mb_checkOrientation)
+						{
+							float rot = LastFrame.mv_keypoints[i].angle-CurrentFrame.mv_keypoints[bestIdx2].angle;
+							if(rot<0.0)
+								rot+=360.0f;
+							int bin = round(rot*factor);
+							if(bin==HISTO_LENGTH)
+								bin=0;
+							assert(bin>=0 && bin<HISTO_LENGTH);
+							rotHist[bin].push_back(bestIdx2);
+						}
+					}
+				}
+			}
+		}
+		if(mb_checkOrientation)
+		{
+			int ind1=-1;
+			int ind2=-1;
+			int ind3=-1;
+
+			ComputeThreeMaxima(rotHist,HISTO_LENGTH,ind1,ind2,ind3);
+
+			for(int i=0; i<HISTO_LENGTH; i++)
+			{
+				if(i!=ind1 && i!=ind2 && i!=ind3)
+				{
+					for(size_t j=0, jend=rotHist[i].size(); j<jend; j++)
+					{
+						CurrentFrame.mvp_mapPoints[rotHist[i][j]]=static_cast<MapPoint*>(NULL);
+						nmatches--;
+					}
+				}
+			}
+		}
+
+		return nmatches;
 	}
 }
